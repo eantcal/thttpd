@@ -195,7 +195,7 @@ public:
      */
     inline const std::string& get_local_uri_path() const
     {
-        return _local_uri_path;
+         return _local_uri_path;
     }
 
  
@@ -319,7 +319,7 @@ private:
     port_t _server_port = DEFAULT_PORT;
     tcp_listener_t::handle_t _tcp_server;
     std::string _web_root = "/tmp";
-    bool _verbose_mode = false;
+    bool _verbose_mode = true;
 
     http_server_t() = default;
 

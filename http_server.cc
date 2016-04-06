@@ -67,9 +67,12 @@ void http_request_t::parse_method(const std::string& method)
 
 void http_request_t::parse_version(const std::string& ver)
 {
-    if (ver == "HTTP/1.0")
+	const size_t vstrlen = sizeof("HTTP/x.x") - 1;
+	std::string v = ver.size() > vstrlen ? ver.substr(0, vstrlen) : ver;
+
+    if (v == "HTTP/1.0")
         _version = version_t::HTTP_1_0;
-    else if (ver == "HTTP/1.1")
+    else if (v == "HTTP/1.1")
         _version = version_t::HTTP_1_1;
     else
         _version = version_t::UNKNOWN;
@@ -314,7 +317,7 @@ class http_server_task_t
 {
 private:
     std::ostream & _logger;
-    bool _verbose_mode = false;
+    bool _verbose_mode = true;
     tcp_socket_t::handle_t _tcp_socket_handle;
     std::string _web_root;
 

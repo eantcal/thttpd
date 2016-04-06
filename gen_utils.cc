@@ -76,7 +76,6 @@ void gen_utils::remove_last_ch_if(std::string& s, char c)
 
 // -----------------------------------------------------------------------------
 
-
 bool gen_utils::file_stat(
       const std::string & filename,
       std::string& date_time,

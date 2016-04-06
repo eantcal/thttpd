@@ -35,7 +35,11 @@
 #ifndef __HTTP_CONFIG_H__
 #define __HTTP_CONFIG_H__
 
+#ifdef WIN32
+#define HTTP_SERVER_WROOT       "C:/tmp"
+#else
 #define HTTP_SERVER_WROOT       "/tmp"
+#endif
 #define HTTP_SERVER_INDEX       "index.html"
 #define HTTP_SERVER_PORT        80
 #define HTTP_SERVER_NAME        "TinyHttpServer"
