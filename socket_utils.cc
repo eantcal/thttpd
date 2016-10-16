@@ -34,14 +34,15 @@
 
 #include "socket_utils.h"
 #include "gen_utils.h"
+
 #include <thread>
 #include <string.h>
 #include <memory>
 
+
 // -----------------------------------------------------------------------------
 // basic_socket_t
 // -----------------------------------------------------------------------------
-
 
 basic_socket_t::basic_socket_t(const socket_desc_t & sd) :
 _socket(sd)
@@ -51,70 +52,34 @@ _socket(sd)
 
 // -----------------------------------------------------------------------------
 
-
-void basic_socket_t::set_errno(errno_t errcode)
-{
-    lock_guard_t lock(_lock);
-
-    _last_err = errcode;
-}
-
-
-// -----------------------------------------------------------------------------
-
-
 basic_socket_t::~basic_socket_t()
 {
-    lock_guard_t lock(_lock);
-
     if (is_valid())
-    {
         os_dep::close_socket(get_sd());
-    }
 }
 
 
 // -----------------------------------------------------------------------------
-
 
 bool basic_socket_t::is_valid() const
 {
-    lock_guard_t lock(_lock);
-
     return _socket > 0;
 }
 
 
 // -----------------------------------------------------------------------------
 
-
 basic_socket_t::operator bool() const
 {
-    lock_guard_t lock(_lock);
-
     return is_valid();
 }
 
 
 // -----------------------------------------------------------------------------
 
-
-errno_t basic_socket_t::get_last_errno() const
-{
-    lock_guard_t lock(_lock);
-
-    return _last_err;
-}
-
-
-// -----------------------------------------------------------------------------
-
-
 basic_socket_t::wait_ev_t basic_socket_t::wait_for_recv_event(
     const basic_socket_t::timeout_t &timeout)
 {
-    lock_guard_t lock(_lock);
-
     struct timeval tv_timeout = { 0 };
     gen_utils::convert_duration_in_timeval(timeout, tv_timeout);
 
@@ -131,8 +96,6 @@ basic_socket_t::wait_ev_t basic_socket_t::wait_for_recv_event(
         (fd_set *)0,
         &tv_timeout);
 
-    set_errno(errno);
-
     if (nd == 0)
         return wait_ev_t::TIMEOUT;
     else if (nd < 0)
@@ -144,61 +107,40 @@ basic_socket_t::wait_ev_t basic_socket_t::wait_for_recv_event(
 
 // -----------------------------------------------------------------------------
 
-
 basic_socket_t::socket_desc_t basic_socket_t::get_sd() const
 {
-    lock_guard_t lock(_lock);
-
     return _socket;
 }
 
 
 // -----------------------------------------------------------------------------
 
-
 int basic_socket_t::send(const char *buf, int len, int flags)
 {
-    lock_guard_t lock(_lock);
-
-    int ret = ::send(get_sd(), buf, len, flags);
-    set_errno(errno);
-
-    return ret;
+    return ::send(get_sd(), buf, len, flags);
 }
 
 
 // -----------------------------------------------------------------------------
-
 
 int basic_socket_t::recv(char *buf, int len, int flag)
 {
-    lock_guard_t lock(_lock);
-
-    int ret = ::recv(get_sd(), buf, len, flag);
-    set_errno(errno);
-
-    return ret;
+    return ::recv(get_sd(), buf, len, flag);
 }
 
 
 // -----------------------------------------------------------------------------
 
-
 int basic_socket_t::send(const std::string& text)
 {
-    lock_guard_t lock(_lock);
-
     return send(text.c_str(), text.size());
 }
 
 
 // -----------------------------------------------------------------------------
 
-
 int basic_socket_t::send_file(const std::string& filepath)
 {
-    lock_guard_t lock(_lock);
-
     std::ifstream ifs(filepath.c_str(), std::ios::in | std::ios::binary);
 
     if (!ifs.is_open())
@@ -249,44 +191,32 @@ int basic_socket_t::send_file(const std::string& filepath)
 // tcp_socket_t
 // -----------------------------------------------------------------------------
 
-
 std::string tcp_socket_t::get_local_ip() const
 {
-    lock_guard_t lock(_lock);
-
     return _local_ip;
 }
 
 
 // -----------------------------------------------------------------------------
 
-
 tcp_socket_t::port_t tcp_socket_t::get_local_port() const
 {
-    lock_guard_t lock(_lock);
-
     return _local_port;
 }
 
 
 // -----------------------------------------------------------------------------
 
-
 std::string tcp_socket_t::get_remote_ip() const
 {
-    lock_guard_t lock(_lock);
-
     return _remote_ip;
 }
 
 
 // -----------------------------------------------------------------------------
 
-
 tcp_socket_t::port_t tcp_socket_t::get_remote_port() const
 {
-    lock_guard_t lock(_lock);
-
     return _remote_port;
 }
 
@@ -297,13 +227,11 @@ tcp_socket_t::port_t tcp_socket_t::get_remote_port() const
 tcp_socket_t& tcp_socket_t::operator <<(const std::string& text)
 {
     send(text);
-
     return *this;
 }
 
 
 // -----------------------------------------------------------------------------
-
 
 tcp_socket_t::tcp_socket_t(
     const socket_desc_t & sd,
@@ -326,10 +254,10 @@ tcp_socket_t::tcp_socket_t(
 // tcp_listener_t
 // -----------------------------------------------------------------------------
 
-
 tcp_listener_t::tcp_listener_t() : 
-basic_socket_t(::socket(AF_INET, SOCK_STREAM, 0)),
-_state(is_valid() ? state_t::VALID : state_t::INVALID)
+    basic_socket_t(::socket(AF_INET, SOCK_STREAM, 0)),
+    _state(is_valid() ? state_t::VALID : state_t::INVALID),
+    _bind_st( bind_st_t::UNBOUND )
 {
     memset(&_local_ip_port_sa_in, 0, sizeof(_local_ip_port_sa_in));
 }
@@ -337,39 +265,29 @@ _state(is_valid() ? state_t::VALID : state_t::INVALID)
 
 // -----------------------------------------------------------------------------
 
-
 tcp_listener_t::state_t tcp_listener_t::get_state() const
 {
-    lock_guard_t lock(_lock);
- 
     return _state;
 }
 
 
 // -----------------------------------------------------------------------------
 
-
 tcp_listener_t::operator bool() const
 {
-    lock_guard_t lock(_lock);
-    
     return get_state() != state_t::INVALID;
 }
 
 
 // -----------------------------------------------------------------------------
 
-
 tcp_listener_t::bind_st_t tcp_listener_t::get_bind_state() const
 {
-    lock_guard_t lock(_lock);
-    
     return _bind_st;
 }
 
 
 // -----------------------------------------------------------------------------
-
 
 tcp_listener_t::handle_t tcp_listener_t::create()
 {
@@ -379,15 +297,10 @@ tcp_listener_t::handle_t tcp_listener_t::create()
 
 // -----------------------------------------------------------------------------
 
-
 bool tcp_listener_t::bind(const std::string& ip, const port_t& port)
 {
-    lock_guard_t lock(_lock);
-
     if (get_sd() <= 0)
-    {
         return false;
-    }
 
     sockaddr_in& sin = _local_ip_port_sa_in;
 
@@ -400,17 +313,14 @@ bool tcp_listener_t::bind(const std::string& ip, const port_t& port)
         reinterpret_cast<const sockaddr*>(&sin), sizeof(sin)))
     {
         _bind_st = bind_st_t::BOUND;
-        set_errno(errno);
         return true;
     }
 
-    set_errno(errno);
     return false;
 }
 
 
 // -----------------------------------------------------------------------------
-
 
 bool tcp_listener_t::bind(const port_t& port)
 {
@@ -424,12 +334,7 @@ bool tcp_listener_t::bind(const port_t& port)
 
 bool tcp_listener_t::listen(int backlog)
 {
-    lock_guard_t lock(_lock);
-
-    bool ret = ::listen(get_sd(), backlog) == 0;
-    set_errno(errno);
-    
-    return ret;
+    return ::listen(get_sd(), backlog) == 0;
 }
 
 
@@ -438,12 +343,8 @@ bool tcp_listener_t::listen(int backlog)
 
 tcp_socket_t::handle_t tcp_listener_t::accept()
 {
-    lock_guard_t lock(_lock);
-
     if (get_state() != state_t::VALID)
-    {
         return tcp_socket_t::handle_t();
-    }
 
     sockaddr remote_sockaddr = { 0 };
 
@@ -454,8 +355,6 @@ tcp_socket_t::handle_t tcp_listener_t::accept()
 
     socket_desc_t sd =
         ::accept(get_sd(), &remote_sockaddr, &sockaddrlen);
-
-    set_errno(errno);
 
     tcp_socket_t::handle_t handle =
         tcp_socket_t::handle_t(sd > 0 ?

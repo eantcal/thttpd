@@ -35,12 +35,14 @@
 
 
 #include <cstdint>
-#include <mutex>
 #include <fstream>
 #include <memory>
+#include <chrono>
+#include <atomic>
 
 #include "os_dep.h"
 #include "http_config.h"
+
 
 // -----------------------------------------------------------------------------
 
@@ -58,8 +60,6 @@ public:
     using timeout_t = std::chrono::system_clock::duration;
 
 protected:
-    mutable std::recursive_mutex _lock;
-    using lock_guard_t = std::lock_guard<std::recursive_mutex>;
 
     /**
      * Construct a basic_socket on an existing native socket
@@ -68,13 +68,6 @@ protected:
      * @param sd native socket descriptor
      */
     basic_socket_t(const socket_desc_t & sd);
-
-    /**
-     * Set internal error code to errcode
-     *
-     * @param errcode error code value
-     */
-    void set_errno(errno_t errcode);
 
 public:
     basic_socket_t(const basic_socket_t&) = delete;
@@ -92,14 +85,6 @@ public:
      * Returns true if socket is valid, false otherwise.
      */
     operator bool() const;
-
-
-    /**
-     * Returns the number of last error.
-     *
-     * @see errno.h
-     */
-    errno_t get_last_errno() const;
 
 
     /**
@@ -143,7 +128,7 @@ public:
      *              of bytes sent, which can be less than the number 
      *              requested to be sent in the len parameter. 
      *              Otherwise, -1 is returned, and a specific error code 
-     *              can be retrieved by calling get_last_errno()
+     *              can be retrieved by calling errno
      *
      */
     int send(const char *buf, int len, int flags = 0);
@@ -163,7 +148,7 @@ public:
      *              If the connection has been gracefully closed, 
      *              the return value is zero.
      *              Otherwise, -1 is returned, and a specific error code 
-     *             can be retrieved by calling get_last_errno()
+     *             can be retrieved by calling errno
      */
     int recv(char *buf, int len, int flags = 0);
 
@@ -176,7 +161,7 @@ public:
      *              of bytes sent, which can be less than the number
      *              requested to be sent in the len parameter.
      *              Otherwise, -1 is returned, and a specific error code
-     *              can be retrieved by get_last_errno()
+     *              can be retrieved by errno
      */
     int send(const std::string& text);
 
@@ -189,13 +174,12 @@ public:
      *              of bytes sent, which can be less than the number
      *              requested to be sent in the len parameter.
      *              Otherwise, -1 is returned, and a specific error code
-     *              can be retrieved by get_last_errno()
+     *              can be retrieved by errno
      */
     int send_file(const std::string& filepath);
 
 private:
-    socket_desc_t      _socket = 0;
-    errno_t			 _last_err = 0;
+    socket_desc_t _socket = 0;
     enum { TX_BUFFER_SIZE = HTTP_SERVER_TX_BUF_SIZE };
 };
 
@@ -256,7 +240,7 @@ public:
      * @return If no error occurs, shutdown returns zero. 
      * Otherwise, -1 is returned 
      */
-    inline int shutdown(shutdown_mode_t how = shutdown_mode_t::DISABLE_SEND_RECV)
+    int shutdown(shutdown_mode_t how = shutdown_mode_t::DISABLE_SEND_RECV)
     {
         return ::shutdown(get_sd(), static_cast<int>( how ));
     }
@@ -284,7 +268,6 @@ private:
 
 
 // -----------------------------------------------------------------------------
-
 
 /**
  * Listens for connections from TCP network clients.
@@ -371,8 +354,8 @@ public:
 
 
 private:
-    state_t _state = state_t::INVALID;
-    bind_st_t _bind_st = bind_st_t::UNBOUND;
+    std::atomic<state_t> _state;
+    std::atomic<bind_st_t> _bind_st;
 
     port_t _port = 0;
     sockaddr_in _local_ip_port_sa_in;
