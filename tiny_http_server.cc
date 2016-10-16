@@ -25,9 +25,9 @@
 // -----------------------------------------------------------------------------
 
 
-#include "socket_utils.h"
-#include "http_server.h"
 #include "gen_utils.h"
+#include "http_server.h"
+#include "socket_utils.h"
 
 #include <iostream>
 #include <string>
@@ -36,8 +36,7 @@
 // -----------------------------------------------------------------------------
 
 
-class prog_args_t
-{
+class prog_args_t {
 private:
     std::string _prog_name;
     std::string _command_line;
@@ -56,22 +55,13 @@ public:
     prog_args_t() = delete;
 
 
-    inline const std::string & get_prog_name() const
-    {
-        return _prog_name;
-    }
+    inline const std::string& get_prog_name() const { return _prog_name; }
 
 
-    inline const std::string & get_command_line() const
-    {
-        return _command_line;
-    }
+    inline const std::string& get_command_line() const { return _command_line; }
 
 
-    inline const std::string & get_web_root() const
-    {
-        return _web_root;
-    }
+    inline const std::string& get_web_root() const { return _web_root; }
 
 
     inline tcp_socket_t::port_t get_http_server_port() const
@@ -80,29 +70,20 @@ public:
     }
 
 
-    inline bool is_good() const
-    {
-        return !_error;
-    }
+    inline bool is_good() const { return !_error; }
 
 
-    inline bool verbose_mode() const
-    {
-        return _verbose_mode;
-    }
+    inline bool verbose_mode() const { return _verbose_mode; }
 
 
-    inline const std::string& error() const
-    {
-        return _err_msg;
-    }
+    inline const std::string& error() const { return _err_msg; }
 
 
-    bool show_info(std::ostream & os) const
+    bool show_info(std::ostream& os) const
     {
         if (_show_ver)
-            os << HTTP_SERVER_NAME << " "
-            << _maj_ver << "." << _min_ver << "\n";
+            os << HTTP_SERVER_NAME << " " << _maj_ver << "." << _min_ver
+               << "\n";
 
         if (!_show_help)
             return _show_ver;
@@ -111,10 +92,10 @@ public:
         os << "\t" << get_prog_name() << "\n";
         os << "\t\t-p | --port <port>\n";
         os << "\t\t\tBind server to a TCP port number (default is "
-            << HTTP_SERVER_PORT << ") \n";
+           << HTTP_SERVER_PORT << ") \n";
         os << "\t\t-w | --webroot <working_dir_path>\n";
         os << "\t\t\tSet a local working directory (default is "
-            << HTTP_SERVER_WROOT << ") \n";
+           << HTTP_SERVER_WROOT << ") \n";
         os << "\t\t-vv | --verbose\n";
         os << "\t\t\tEnable logging on stderr\n";
         os << "\t\t-v | --version\n";
@@ -140,46 +121,32 @@ public:
         if (argc <= 1)
             return;
 
-        enum class state_t { OPTION, PORT, WEBROOT }
-        state = state_t::OPTION;
+        enum class state_t { OPTION, PORT, WEBROOT } state = state_t::OPTION;
 
-        for (int idx = 1; idx < argc; ++idx)
-        {
+        for (int idx = 1; idx < argc; ++idx) {
             std::string sarg = argv[idx];
 
             _command_line += " ";
             _command_line += sarg;
 
-            switch (state)
-            {
+            switch (state) {
             case state_t::OPTION:
-                if (sarg == "--port" || sarg == "-p")
-                {
+                if (sarg == "--port" || sarg == "-p") {
                     state = state_t::PORT;
-                }
-                else if (sarg == "--webroot" || sarg == "-w")
-                {
+                } else if (sarg == "--webroot" || sarg == "-w") {
                     state = state_t::WEBROOT;
-                }
-                else if (sarg == "--help" || sarg == "-h")
-                {
+                } else if (sarg == "--help" || sarg == "-h") {
                     _show_help = true;
                     state = state_t::OPTION;
-                }
-                else if (sarg == "--version" || sarg == "-v")
-                {
+                } else if (sarg == "--version" || sarg == "-v") {
                     _show_ver = true;
                     state = state_t::OPTION;
-                }
-                else if (sarg == "--verbose" || sarg == "-vv")
-                {
+                } else if (sarg == "--verbose" || sarg == "-vv") {
                     _verbose_mode = true;
                     state = state_t::OPTION;
-                }
-                else
-                {
-                    _err_msg = "Unknown option '" +
-                        sarg + "', try with --help or -h";
+                } else {
+                    _err_msg = "Unknown option '" + sarg
+                        + "', try with --help or -h";
                     _error = true;
                     return;
                 }
@@ -197,7 +164,6 @@ public:
             }
         }
     }
-
 };
 
 /**
@@ -208,64 +174,57 @@ int main(int argc, char* argv[])
     std::string msg;
 
     // Initialize O/S specific libraries
-    if (!os_dep::init_lib(msg))
-    {
+    if (!os_dep::init_lib(msg)) {
         if (!msg.empty())
             std::cerr << msg << std::endl;
 
         return 1;
     }
 
-    //Parse the command line
+    // Parse the command line
     prog_args_t args(argc, argv);
 
 
-    if (!args.is_good())
-    {
+    if (!args.is_good()) {
         std::cerr << args.error() << std::endl;
         return 1;
     }
 
-    if (args.show_info(std::cout))
-    {
+    if (args.show_info(std::cout)) {
         return 0;
     }
 
-    http_server_t & httpsrv = http_server_t::get_instance();
+    http_server_t& httpsrv = http_server_t::get_instance();
 
     httpsrv.set_web_root(args.get_web_root());
 
     bool res = httpsrv.bind(args.get_http_server_port());
 
-    if (!res)
-    {
-        std::cerr << "Error binding server port "
-            << httpsrv.get_local_port() << "\n";
+    if (!res) {
+        std::cerr << "Error binding server port " << httpsrv.get_local_port()
+                  << "\n";
         return 1;
     }
 
     res = httpsrv.listen(HTTP_SERVER_BACKLOG);
-    if (!res)
-    {
+    if (!res) {
         std::cerr << "Error setting listeing mode\n";
         return 1;
     }
 
-    std::cout
-        << gen_utils::get_local_time() << std::endl
-        << "Command line :'" << args.get_command_line() << "'" << std::endl
-        << HTTP_SERVER_NAME << " is listening on TCP port "
-        << args.get_http_server_port() << std::endl
-        << "Working directory is '" << args.get_web_root() << "'\n";
+    std::cout << gen_utils::get_local_time() << std::endl
+              << "Command line :'" << args.get_command_line() << "'"
+              << std::endl
+              << HTTP_SERVER_NAME << " is listening on TCP port "
+              << args.get_http_server_port() << std::endl
+              << "Working directory is '" << args.get_web_root() << "'\n";
 
     httpsrv.set_logger(args.verbose_mode() ? &std::clog : nullptr);
 
-    if (!httpsrv.run())
-    {
+    if (!httpsrv.run()) {
         std::cerr << "Error starting the server\n";
         return 1;
     }
 
     return 0;
 }
-

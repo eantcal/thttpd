@@ -46,18 +46,18 @@
 // ----------------------------------------------------------------------------
 
 
-#pragma comment (lib, "Ws2_32.lib")
+#pragma comment(lib, "Ws2_32.lib")
 
 
-bool os_dep::init_lib(std::string & msg)
+bool os_dep::init_lib(std::string& msg)
 {
     // Socket library initialization
     WORD wVersionRequested = WINSOCK_VERSION;
     WSADATA wsaData = { 0 };
 
-    bool ret = 0==WSAStartup(wVersionRequested, &wsaData);
-    
-    if (!ret) 
+    bool ret = 0 == WSAStartup(wVersionRequested, &wsaData);
+
+    if (!ret)
         msg = "WSAStartup failed";
 
     return ret;
@@ -67,10 +67,7 @@ bool os_dep::init_lib(std::string & msg)
 // ----------------------------------------------------------------------------
 
 
-int os_dep::close_socket( int sd )
-{
-   return ::closesocket(sd);
-}
+int os_dep::close_socket(int sd) { return ::closesocket(sd); }
 
 
 // ----------------------------------------------------------------------------
@@ -80,23 +77,17 @@ int os_dep::close_socket( int sd )
 
 
 // ----------------------------------------------------------------------------
-// GNU C++ 
+// GNU C++
 // ----------------------------------------------------------------------------
 
 
-bool os_dep::init_lib(std::string & msg)
-{
-    return true;
-}
+bool os_dep::init_lib(std::string& msg) { return true; }
 
 
 // ----------------------------------------------------------------------------
 
 
-int os_dep::close_socket( int sd )
-{
-   return ::close(sd);
-}
+int os_dep::close_socket(int sd) { return ::close(sd); }
 
 
 // ----------------------------------------------------------------------------
@@ -106,5 +97,3 @@ int os_dep::close_socket( int sd )
 
 
 // ----------------------------------------------------------------------------
-
-

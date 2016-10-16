@@ -27,7 +27,7 @@
 // -----------------------------------------------------------------------------
 
 
-/// \file http_server.h 
+/// \file http_server.h
 /// \brief Declaration of HTTP classes
 
 
@@ -37,24 +37,23 @@
 #include "http_config.h"
 #include "socket_utils.h"
 
+#include <iostream>
 #include <list>
+#include <map>
+#include <memory>
 #include <string>
 #include <vector>
-#include <map>
-#include <iostream>
-#include <memory>
 
 // -----------------------------------------------------------------------------
 
 
 /**
- * Encapsulates HTTP style request, consisting of a request line, 
+ * Encapsulates HTTP style request, consisting of a request line,
  * some headers, and a content body
  */
-class http_request_t
-{
+class http_request_t {
 public:
-    using handle_t = std::shared_ptr< http_request_t >;
+    using handle_t = std::shared_ptr<http_request_t>;
 
     enum class method_t { GET, HEAD, POST, UNKNOWN };
     enum class version_t { HTTP_1_0, HTTP_1_1, UNKNOWN };
@@ -66,41 +65,29 @@ public:
     /**
      * Returns the request headers
      */
-    inline const std::list<std::string> & get_header() const
-    {
-        return _header;
-    }
+    inline const std::list<std::string>& get_header() const { return _header; }
 
 
     /**
      * Returns the method of the command line (GET, HEAD, ...)
      */
-    inline method_t get_method() const
-    {
-        return _method;
-    }
+    inline method_t get_method() const { return _method; }
 
 
     /**
      * Returns the HTTP version (HTTP/1.0, HTTP/1.1, ...)
      */
-    inline version_t get_version() const
-    {
-        return _version;
-    }
+    inline version_t get_version() const { return _version; }
 
 
     /**
      * Returns the command line URI
      */
-    inline const std::string& get_uri() const
-    {
-        return _uri;
-    }
+    inline const std::string& get_uri() const { return _uri; }
 
 
     /**
-     * Set HTTP method field decoding the string method 
+     * Set HTTP method field decoding the string method
      *
      * @param method The input string to parse
      */
@@ -144,7 +131,7 @@ public:
      * @param id A string used to identify the request
      * @return the os output stream
      */
-    std::ostream & dump(std::ostream & os, const std::string& id = "");
+    std::ostream& dump(std::ostream& os, const std::string& id = "");
 
 
 private:
@@ -155,8 +142,6 @@ private:
 };
 
 
-
-
 // -----------------------------------------------------------------------------
 // http_response_t
 // -----------------------------------------------------------------------------
@@ -165,8 +150,7 @@ private:
  * Encapsulates HTTP style response, consisting of a status line,
  * some headers, and a content body
  */
-class http_response_t
-{
+class http_response_t {
 public:
     http_response_t() = delete;
     http_response_t(const http_response_t&) = default;
@@ -175,19 +159,14 @@ public:
     /**
      * Construct a response to a request
      * @param request an http request
-     * @param web_root local working directory of the web server 
+     * @param web_root local working directory of the web server
      */
-    http_response_t(
-        const http_request_t & request,
-        const std::string& web_root);
+    http_response_t(const http_request_t& request, const std::string& web_root);
 
     /**
-     * Returns the content of response status line and response headers 
+     * Returns the content of response status line and response headers
      */
-    inline operator const std::string& () const
-    {
-        return _response;
-    }
+    inline operator const std::string&() const { return _response; }
 
 
     /**
@@ -195,10 +174,10 @@ public:
      */
     inline const std::string& get_local_uri_path() const
     {
-         return _local_uri_path;
+        return _local_uri_path;
     }
 
- 
+
     /**
      * Prints the response out to os stream
      *
@@ -206,27 +185,24 @@ public:
      * @param id A string used to identify the response
      * @return the os output stream
      */
-    std::ostream & dump(std::ostream & os, const std::string& id = "");
+    std::ostream& dump(std::ostream& os, const std::string& id = "");
 
 private:
-    static std::map < std::string, std::string > _mime_tbl;
-    
+    static std::map<std::string, std::string> _mime_tbl;
+
     std::string _response;
     std::string _local_uri_path;
 
-    // Format an error response 
+    // Format an error response
     static void format_error(
-        std::string & output, int code, const std::string & msg);
+        std::string& output, int code, const std::string& msg);
 };
-
-
 
 
 /**
  * This class represents an HTTP connection between a client and a server
  */
-class http_socket_t
-{
+class http_socket_t {
 private:
     tcp_socket_t::handle_t _socket_handle;
     bool _conn_up = true;
@@ -236,35 +212,33 @@ public:
     http_socket_t() = default;
     http_socket_t(const http_socket_t&) = default;
 
-    
+
     /**
      * Construct the HTTP connection starting from TCP connected-socket handle
      */
-    inline http_socket_t(tcp_socket_t::handle_t handle) : 
-        _socket_handle(handle)
-    {}
+    inline http_socket_t(tcp_socket_t::handle_t handle)
+        : _socket_handle(handle)
+    {
+    }
 
-    
+
     /**
      * Assigns a new TCP connected socket handle to this HTTP socket
      */
-    http_socket_t & operator=(tcp_socket_t::handle_t handle);
+    http_socket_t& operator=(tcp_socket_t::handle_t handle);
 
 
     /**
      * Returns TCP socket handle
      */
-    inline operator tcp_socket_t::handle_t() const 
-    {
-        return _socket_handle;
-    }
+    inline operator tcp_socket_t::handle_t() const { return _socket_handle; }
 
 
     /**
      * Receives an HTTP request from remote peer
      * @param the handle of http request object
      */
-    inline http_socket_t & operator>>(http_request_t::handle_t & handle)
+    inline http_socket_t& operator>>(http_request_t::handle_t& handle)
     {
         handle = recv();
         return *this;
@@ -272,13 +246,10 @@ public:
 
 
     /**
-     * Returns false if last recv/send operation detected 
+     * Returns false if last recv/send operation detected
      * that connection was down; true otherwise
      */
-    inline explicit operator bool() const
-    {
-        return _conn_up;
-    }
+    inline explicit operator bool() const { return _conn_up; }
 
 
     /**
@@ -286,7 +257,7 @@ public:
      *
      * @param response The HTTP response
      */
-    http_socket_t & operator <<(const http_response_t & response);
+    http_socket_t& operator<<(const http_response_t& response);
 
 
     /**
@@ -294,9 +265,9 @@ public:
      *
      * @param response The HTTP response
      */
-    inline int send_file (const std::string & filename)
+    inline int send_file(const std::string& filename)
     {
-        return  _socket_handle->send_file(filename);
+        return _socket_handle->send_file(filename);
     }
 };
 
@@ -307,15 +278,14 @@ public:
 /**
  * The top-level class of the HTTP server
  */
-class http_server_t
-{
+class http_server_t {
 public:
     using port_t = tcp_listener_t::port_t;
     enum { DEFAULT_PORT = HTTP_SERVER_PORT };
 
 private:
-    std::ostream * _logger_ptr = &std::clog;
-    static http_server_t * _instance;
+    std::ostream* _logger_ptr = &std::clog;
+    static http_server_t* _instance;
     port_t _server_port = DEFAULT_PORT;
     tcp_listener_t::handle_t _tcp_server;
     std::string _web_root = "/tmp";
@@ -325,7 +295,7 @@ private:
 
 public:
     http_server_t(const http_server_t&) = delete;
-    http_server_t& operator = (const http_server_t&) = delete;
+    http_server_t& operator=(const http_server_t&) = delete;
 
 
     /**
@@ -333,15 +303,12 @@ public:
      *
      * @param pointer to ostream used for logging
      */
-    inline void set_logger(std::ostream * logger_ptr = nullptr)
+    inline void set_logger(std::ostream* logger_ptr = nullptr)
     {
-        if (logger_ptr)
-        {
+        if (logger_ptr) {
             _logger_ptr = logger_ptr;
             _verbose_mode = true;
-        }
-        else
-        {
+        } else {
             _verbose_mode = false;
         }
     }
@@ -355,16 +322,13 @@ public:
      *
      * @return the http_server_t reference
      */
-    static auto get_instance()->http_server_t&;
+    static auto get_instance() -> http_server_t&;
 
 
     /**
      * Gets current server working directory
      */
-    inline const std::string& get_web_root() const
-    {
-        return _web_root;
-    }
+    inline const std::string& get_web_root() const { return _web_root; }
 
 
     /**
@@ -380,10 +344,7 @@ public:
      * Gets the server listening port
      * @return the port number
      */
-    inline const port_t get_local_port() const
-    {
-        return _server_port;
-    }
+    inline const port_t get_local_port() const { return _server_port; }
 
 
     /**
@@ -406,7 +367,7 @@ public:
     /**
      * Run the server. This function is blocking for the caller.
      *
-     * @return false if operation failed, otherwise the function 
+     * @return false if operation failed, otherwise the function
      * doesn't return ever
      */
     bool run();
@@ -416,32 +377,20 @@ protected:
     /**
      * This function wait for receive activity or until time-out expires
      *
-     * @param timeout the duration of time-out 
+     * @param timeout the duration of time-out
      * @return true if receive activity is detected, false otherwise
      * Using @see get_last_errno() is possible to distinguish between a timeout
      * and error
      */
-    bool wait_for_conn(const basic_socket_t::timeout_t & timeout);
+    bool wait_for_conn(const basic_socket_t::timeout_t& timeout);
 
     /**
-     * Accepts a new connection from remote client. 
+     * Accepts a new connection from remote client.
      * This function blocks until connection is established or
      * an error occurs.
      * @return a handle to tcp socket
      */
-    inline tcp_socket_t::handle_t accept()
-    {
-        return _tcp_server->accept();
-    }
-
-    /**
-     * Returns the last error code
-     * @return the error code
-     */
-    inline errno_t get_last_errno() const
-    {
-        return _tcp_server->get_last_errno();
-    }
+    tcp_socket_t::handle_t accept() { return _tcp_server->accept(); }
 };
 
 

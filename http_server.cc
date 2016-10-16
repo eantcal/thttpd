@@ -22,7 +22,7 @@
  */
 
 
-/// \file http_server.cc 
+/// \file http_server.cc
 /// \brief Implementation of HTTP classes
 
 
@@ -34,12 +34,12 @@
 #include "gen_utils.h"
 #include "os_dep.h"
 
-#include <iostream>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sstream>
-#include <thread>
 #include <cassert>
+#include <iostream>
+#include <sstream>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <thread>
 
 // -----------------------------------------------------------------------------
 
@@ -67,8 +67,8 @@ void http_request_t::parse_method(const std::string& method)
 
 void http_request_t::parse_version(const std::string& ver)
 {
-	const size_t vstrlen = sizeof("HTTP/x.x") - 1;
-	std::string v = ver.size() > vstrlen ? ver.substr(0, vstrlen) : ver;
+    const size_t vstrlen = sizeof("HTTP/x.x") - 1;
+    std::string v = ver.size() > vstrlen ? ver.substr(0, vstrlen) : ver;
 
     if (v == "HTTP/1.0")
         _version = version_t::HTTP_1_0;
@@ -82,7 +82,7 @@ void http_request_t::parse_version(const std::string& ver)
 // -----------------------------------------------------------------------------
 
 
-std::ostream & http_request_t::dump(std::ostream & os, const std::string& id)
+std::ostream& http_request_t::dump(std::ostream& os, const std::string& id)
 {
 
     std::string ss;
@@ -95,20 +95,18 @@ std::ostream & http_request_t::dump(std::ostream & os, const std::string& id)
 }
 
 
-
 // -----------------------------------------------------------------------------
 // http_response_t
 // -----------------------------------------------------------------------------
 
 
 void http_response_t::format_error(
-    std::string & output, int code, const std::string & msg)
+    std::string& output, int code, const std::string& msg)
 {
     std::string scode = std::to_string(code);
 
-    std::string error_html =
-        "<html><head><title>" + scode + " " + msg + "</title></head>" +
-        "<body>Forbidden</body></html>\r\n";
+    std::string error_html = "<html><head><title>" + scode + " " + msg
+        + "</title></head>" + "<body>Forbidden</body></html>\r\n";
 
     output = "HTTP/1.1 " + scode + " " + msg + "\r\n";
     output += "Date: " + gen_utils::get_local_time() + "\r\n";
@@ -124,16 +122,17 @@ void http_response_t::format_error(
 
 
 http_response_t::http_response_t(
-    const http_request_t & request, const std::string& web_root)
+    const http_request_t& request, const std::string& web_root)
 {
-    if (request.get_method() == http_request_t::method_t::UNKNOWN)
-    {
+    if (request.get_method() == http_request_t::method_t::UNKNOWN) {
         format_error(_response, 403, "Forbidden");
         return;
     }
 
-    auto rpath = [](std::string& s)
-    { if (!s.empty() && s[0] != '/') s = "/" + s; };
+    auto rpath = [](std::string& s) {
+        if (!s.empty() && s[0] != '/')
+            s = "/" + s;
+    };
 
     _local_uri_path = request.get_uri();
     rpath(_local_uri_path);
@@ -142,11 +141,11 @@ http_response_t::http_response_t(
     std::string file_time, mimekey;
     size_t content_len = 0;
 
-    if (gen_utils::file_stat(_local_uri_path, file_time, mimekey, content_len))
-    {
+    if (gen_utils::file_stat(
+            _local_uri_path, file_time, mimekey, content_len)) {
         _response = "HTTP/1.1 200 OK\r\n";
-        _response += "Date: " + gen_utils::get_local_time() +"\r\n";
-        _response += "Server: "  HTTP_SERVER_NAME  "\r\n";
+        _response += "Date: " + gen_utils::get_local_time() + "\r\n";
+        _response += "Server: " HTTP_SERVER_NAME "\r\n";
         _response += "Content-Length: " + std::to_string(content_len) + "\r\n";
         _response += "Connection: Keep-Alive\r\n";
         _response += "Last Modified: " + file_time + "\r\n";
@@ -155,15 +154,12 @@ http_response_t::http_response_t(
         // Resolve mime type using the uri/file extension
         auto it = _mime_tbl.find(mimekey);
 
-        _response +=
-            it != _mime_tbl.end() ?
-            it->second :
-            "application/octet-stream";
-        
-        //Close the rensponse header by using the sequence CRFL twice
+        _response
+            += it != _mime_tbl.end() ? it->second : "application/octet-stream";
+
+        // Close the rensponse header by using the sequence CRFL twice
         _response += "\r\n\r\n";
-    }
-    else
+    } else
         format_error(_response, 404, "Not Found");
 }
 
@@ -171,7 +167,7 @@ http_response_t::http_response_t(
 // -----------------------------------------------------------------------------
 
 
-std::ostream & http_response_t::dump(std::ostream & os, const std::string& id)
+std::ostream& http_response_t::dump(std::ostream& os, const std::string& id)
 {
 
     std::string ss;
@@ -183,14 +179,12 @@ std::ostream & http_response_t::dump(std::ostream & os, const std::string& id)
 }
 
 
-
-
 // -----------------------------------------------------------------------------
 // http_socket_t
 // -----------------------------------------------------------------------------
 
 
-http_socket_t & http_socket_t::operator = (tcp_socket_t::handle_t handle)
+http_socket_t& http_socket_t::operator=(tcp_socket_t::handle_t handle)
 {
     _socket_handle = handle;
     return *this;
@@ -209,17 +203,19 @@ http_request_t::handle_t http_socket_t::recv()
 
     enum class crlf_t { CR1, LF1, CR2, LF2, IDLE } s = crlf_t::IDLE;
 
-    auto crlf = [&s](char c) -> bool
-    {
-        switch (s)
-        {
-        case crlf_t::IDLE: s = (c == '\r') ? crlf_t::CR1 : crlf_t::IDLE;
+    auto crlf = [&s](char c) -> bool {
+        switch (s) {
+        case crlf_t::IDLE:
+            s = (c == '\r') ? crlf_t::CR1 : crlf_t::IDLE;
             break;
-        case crlf_t::CR1: s = (c == '\n') ? crlf_t::LF1 : crlf_t::IDLE;
+        case crlf_t::CR1:
+            s = (c == '\n') ? crlf_t::LF1 : crlf_t::IDLE;
             break;
-        case crlf_t::LF1: s = (c == '\r') ? crlf_t::CR2 : crlf_t::IDLE;
+        case crlf_t::LF1:
+            s = (c == '\r') ? crlf_t::CR2 : crlf_t::IDLE;
             break;
-        case crlf_t::CR2: s = (c == '\n') ? crlf_t::LF2 : crlf_t::IDLE;
+        case crlf_t::CR2:
+            s = (c == '\n') ? crlf_t::LF2 : crlf_t::IDLE;
             break;
         }
 
@@ -228,50 +224,40 @@ http_request_t::handle_t http_socket_t::recv()
 
     std::string line;
 
-    while (ret > 0 && _conn_up && _socket_handle)
-    {
+    while (ret > 0 && _conn_up && _socket_handle) {
         ret = _socket_handle->recv(&c, 1);
 
-        if (ret > 0)
-        {
+        if (ret > 0) {
             line += c;
-        }
-        else if (ret <= 0)
-        {
+        } else if (ret <= 0) {
             _conn_up = false;
             break;
         }
 
-        if (crlf(c))
-        {
+        if (crlf(c)) {
             break;
         }
 
-        if (s == crlf_t::LF1)
-        {
-            if (!line.empty())
-            {
+        if (s == crlf_t::LF1) {
+            if (!line.empty()) {
                 handle->add_header(line);
                 line.clear();
             }
         }
     }
 
-    if (ret < 0 || !_socket_handle || handle->get_header().empty())
-    {
+    if (ret < 0 || !_socket_handle || handle->get_header().empty()) {
         return handle;
     }
 
     std::string request = *handle->get_header().cbegin();
-    std::vector< std::string > tokens;
+    std::vector<std::string> tokens;
 
-    if (!gen_utils::split_line_in_tokens(request, tokens, " "))
-    {
+    if (!gen_utils::split_line_in_tokens(request, tokens, " ")) {
         return handle;
     }
 
-    if (tokens.size() != 3)
-    {
+    if (tokens.size() != 3) {
         return handle;
     }
 
@@ -286,16 +272,14 @@ http_request_t::handle_t http_socket_t::recv()
 // -----------------------------------------------------------------------------
 
 
-http_socket_t & http_socket_t::operator << (const http_response_t & response)
+http_socket_t& http_socket_t::operator<<(const http_response_t& response)
 {
-    const std::string & response_txt = response;
+    const std::string& response_txt = response;
     size_t to_send = response_txt.size();
 
-    while (to_send > 0)
-    {
+    while (to_send > 0) {
         int sent = _socket_handle->send(response);
-        if (sent < 0)
-        {
+        if (sent < 0) {
             _conn_up = false;
             break;
         }
@@ -306,63 +290,46 @@ http_socket_t & http_socket_t::operator << (const http_response_t & response)
 }
 
 
-
-
 // -----------------------------------------------------------------------------
 // http_server_task_t
 // -----------------------------------------------------------------------------
 
 
-class http_server_task_t
-{
+class http_server_task_t {
 private:
-    std::ostream & _logger;
+    std::ostream& _logger;
     bool _verbose_mode = true;
     tcp_socket_t::handle_t _tcp_socket_handle;
     std::string _web_root;
 
-    inline std::ostream & log()
-    {
-        return _logger;
-    }
+    inline std::ostream& log() { return _logger; }
 
-    inline bool verbose_mode() const
-    {
-        return _verbose_mode;
-    }
+    inline bool verbose_mode() const { return _verbose_mode; }
 
-    inline tcp_socket_t::handle_t & get_tcp_socket_handle()
+    inline tcp_socket_t::handle_t& get_tcp_socket_handle()
     {
         return _tcp_socket_handle;
     }
 
-    inline const std::string& web_root_dir() const
-    {
-        return _web_root;
-    }
+    inline const std::string& web_root_dir() const { return _web_root; }
 
-    inline http_server_task_t(bool verbose_mode,
-        std::ostream & logger,
-        tcp_socket_t::handle_t socket_handle,
-        const std::string& web_root)
-        : _verbose_mode(verbose_mode),
-        _logger(logger),
-        _tcp_socket_handle(socket_handle),
-        _web_root(web_root)
-    {}
+    inline http_server_task_t(bool verbose_mode, std::ostream& logger,
+        tcp_socket_t::handle_t socket_handle, const std::string& web_root)
+        : _verbose_mode(verbose_mode)
+        , _logger(logger)
+        , _tcp_socket_handle(socket_handle)
+        , _web_root(web_root)
+    {
+    }
 
 public:
     using handle_t = std::shared_ptr<http_server_task_t>;
 
-    inline static handle_t create(
-        bool verbose_mode,
-        std::ostream & logger,
-        tcp_socket_t::handle_t socket_handle,
-        const std::string& web_root)
+    inline static handle_t create(bool verbose_mode, std::ostream& logger,
+        tcp_socket_t::handle_t socket_handle, const std::string& web_root)
     {
-        return handle_t(
-            new http_server_task_t(
-                verbose_mode, logger, socket_handle, web_root));
+        return handle_t(new http_server_task_t(
+            verbose_mode, logger, socket_handle, web_root));
     }
 
     http_server_task_t() = delete;
@@ -373,7 +340,7 @@ public:
 // -----------------------------------------------------------------------------
 
 // Handles the HTTP server request
-// This method executes in a specific thread context for 
+// This method executes in a specific thread context for
 // each accepted HTTP request
 void http_server_task_t::operator()(handle_t task_handle)
 {
@@ -381,19 +348,16 @@ void http_server_task_t::operator()(handle_t task_handle)
 
     const int sd = get_tcp_socket_handle()->get_sd();
 
-    //Generates an identifier for recognizing the transaction
-    auto transaction_id = [sd]()
-    {
-        return
-            "[" + std::to_string(sd) + "] " +
-            "[" + gen_utils::get_local_time() + "]";
+    // Generates an identifier for recognizing the transaction
+    auto transaction_id = [sd]() {
+        return "[" + std::to_string(sd) + "] " + "["
+            + gen_utils::get_local_time() + "]";
     };
 
     if (verbose_mode())
         log() << transaction_id() << "---- http_server_task +\n\n";
 
-    while (get_tcp_socket_handle())
-    {
+    while (get_tcp_socket_handle()) {
         // Create an http socket around a connected tcp socket
         http_socket_t http_socket(get_tcp_socket_handle());
 
@@ -405,25 +369,22 @@ void http_server_task_t::operator()(handle_t task_handle)
         if (!http_socket)
             break;
 
-        //Log the request
+        // Log the request
         if (verbose_mode())
             http_request->dump(log(), transaction_id());
 
-        //Build a response to previous HTTP request
+        // Build a response to previous HTTP request
         http_response_t response(*http_request, web_root_dir());
 
-        //Send the response to remote peer
+        // Send the response to remote peer
         http_socket << response;
 
-        //If HTTP command line method isn't HEAD then send requested URI
-        if (http_request->get_method() != http_request_t::method_t::HEAD)
-        {
-            if (0 > http_socket.send_file(response.get_local_uri_path()))
-            {
+        // If HTTP command line method isn't HEAD then send requested URI
+        if (http_request->get_method() != http_request_t::method_t::HEAD) {
+            if (0 > http_socket.send_file(response.get_local_uri_path())) {
                 if (verbose_mode())
-                    log() << transaction_id()
-                        << "Error sending '"
-                        << response.get_local_uri_path() << "'\n\n";
+                    log() << transaction_id() << "Error sending '"
+                          << response.get_local_uri_path() << "'\n\n";
                 break;
             }
         }
@@ -434,26 +395,21 @@ void http_server_task_t::operator()(handle_t task_handle)
 
     get_tcp_socket_handle()->shutdown();
 
-    if (verbose_mode())
-    {
+    if (verbose_mode()) {
         log() << transaction_id() << "---- http_server_task -\n\n";
         log().flush();
     }
-    
 }
 
 
-
-
 // -----------------------------------------------------------------------------
-// http_server_t 
+// http_server_t
 // -----------------------------------------------------------------------------
 
 
 auto http_server_t::get_instance() -> http_server_t&
 {
-    if (_instance == nullptr)
-    {
+    if (_instance == nullptr) {
         _instance = new http_server_t();
     }
 
@@ -468,13 +424,11 @@ bool http_server_t::bind(port_t port)
 {
     _tcp_server = tcp_listener_t::create();
 
-    if (!_tcp_server)
-    {
+    if (!_tcp_server) {
         return false;
     }
 
-    if (!_tcp_server->bind(port))
-    {
+    if (!_tcp_server->bind(port)) {
         return false;
     }
 
@@ -487,13 +441,11 @@ bool http_server_t::bind(port_t port)
 
 bool http_server_t::listen(int max_connections)
 {
-    if (!_tcp_server)
-    {
+    if (!_tcp_server) {
         return false;
     }
 
-    if (!_tcp_server->listen(max_connections))
-    {
+    if (!_tcp_server->listen(max_connections)) {
         return false;
     }
 
@@ -508,30 +460,28 @@ bool http_server_t::run()
 {
     // Create a thread for each TCP accepted connection and
     // delegate it to handle HTTP request / response
-    while (true)
-    {
+    while (true) {
         const tcp_socket_t::handle_t handle = accept();
 
-        //Fatal error: we stop the server
-        if (!handle)
-        {
-           std::this_thread::sleep_for(std::chrono::seconds(1));
-           continue;
+        // Fatal error: we stop the server
+        if (!handle) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            continue;
         }
 
         assert(_logger_ptr);
 
-        http_server_task_t::handle_t task_handle =
-            http_server_task_t::create(_verbose_mode, *_logger_ptr, handle, get_web_root());
+        http_server_task_t::handle_t task_handle = http_server_task_t::create(
+            _verbose_mode, *_logger_ptr, handle, get_web_root());
 
-        //Coping the http_server_task handle (shared_ptr) the reference 
-        //count is automatically increased by one
+        // Coping the http_server_task handle (shared_ptr) the reference
+        // count is automatically increased by one
         std::thread worker_thread(*task_handle, task_handle);
-        
+
         worker_thread.detach();
     }
 
-    //Ok, following instruction won't be ever executed
+    // Ok, following instruction won't be ever executed
     return true;
 }
 
@@ -539,16 +489,16 @@ bool http_server_t::run()
 // -----------------------------------------------------------------------------
 
 
-bool http_server_t::wait_for_conn(const basic_socket_t::timeout_t & timeout)
+bool http_server_t::wait_for_conn(const basic_socket_t::timeout_t& timeout)
 {
-    if (!_tcp_server->is_valid() ||
-        _tcp_server->get_bind_state() == tcp_listener_t::bind_st_t::UNBOUND)
-    {
+    if (!_tcp_server->is_valid()
+        || _tcp_server->get_bind_state()
+            == tcp_listener_t::bind_st_t::UNBOUND) {
         return false;
     }
 
-    const tcp_listener_t::wait_ev_t st = 
-        _tcp_server->wait_for_recv_event(timeout);
+    const tcp_listener_t::wait_ev_t st
+        = _tcp_server->wait_for_recv_event(timeout);
 
     return st == tcp_listener_t::wait_ev_t::RECV_DATA;
 }
@@ -557,8 +507,7 @@ bool http_server_t::wait_for_conn(const basic_socket_t::timeout_t & timeout)
 // -----------------------------------------------------------------------------
 
 
-http_server_t * http_server_t::_instance = nullptr;
+http_server_t* http_server_t::_instance = nullptr;
 
 
 // -----------------------------------------------------------------------------
-

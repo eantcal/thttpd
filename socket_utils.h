@@ -23,7 +23,7 @@
 
 
 /// \file socket_utils.h
-/// \brief Declaration of socket classes containing some 
+/// \brief Declaration of socket classes containing some
 /// useful stuff cross-platform for manipulating socket
 
 
@@ -34,14 +34,14 @@
 // -----------------------------------------------------------------------------
 
 
+#include <atomic>
+#include <chrono>
 #include <cstdint>
 #include <fstream>
 #include <memory>
-#include <chrono>
-#include <atomic>
 
-#include "os_dep.h"
 #include "http_config.h"
+#include "os_dep.h"
 
 
 // -----------------------------------------------------------------------------
@@ -50,8 +50,7 @@
 /**
  * Provides socket functionality
  */
-class basic_socket_t
-{
+class basic_socket_t {
 
 public:
     using port_t = uint16_t;
@@ -60,14 +59,13 @@ public:
     using timeout_t = std::chrono::system_clock::duration;
 
 protected:
-
     /**
      * Construct a basic_socket on an existing native socket
      * descriptor (@see ::socket())
-     * 
+     *
      * @param sd native socket descriptor
      */
-    basic_socket_t(const socket_desc_t & sd);
+    basic_socket_t(const socket_desc_t& sd);
 
 public:
     basic_socket_t(const basic_socket_t&) = delete;
@@ -90,23 +88,23 @@ public:
     /**
      * Determines the readability status of this socket
      *
-     * If you are in a listening state, readability means 
+     * If you are in a listening state, readability means
      * that a call to accept() will succeed without blocking.
-     * If you have already accepted the connection, 
-     * readability means that data is available for reading. 
-     * In these cases, all receive operations will succeed 
-     * without blocking. 
-     * Readability can also indicate whether the remote Socket 
-     * has shut down the connection; in that case a call 
-     * to recv() will return immediately, 
+     * If you have already accepted the connection,
+     * readability means that data is available for reading.
+     * In these cases, all receive operations will succeed
+     * without blocking.
+     * Readability can also indicate whether the remote Socket
+     * has shut down the connection; in that case a call
+     * to recv() will return immediately,
      * with zero bytes returned.
      *
      * @param timeout The time-out value.
      * @return wait_ev_t::RECV_DATA if data is available for reading,
      *         wait_ev_t::TIMEOUT if the time limit expired or
-     *         wait_ev_t::RECV_ERROR if an error occurred 
+     *         wait_ev_t::RECV_ERROR if an error occurred
      */
-    wait_ev_t wait_for_recv_event(const timeout_t &timeout);
+    wait_ev_t wait_for_recv_event(const timeout_t& timeout);
 
 
     /**
@@ -124,14 +122,14 @@ public:
      *              to by the buf parameter.
      * @param flags A set of flags that specify the way in which the
      *              call is made.
-     * @return      If no error occurs, send() returns the total number 
-     *              of bytes sent, which can be less than the number 
-     *              requested to be sent in the len parameter. 
-     *              Otherwise, -1 is returned, and a specific error code 
+     * @return      If no error occurs, send() returns the total number
+     *              of bytes sent, which can be less than the number
+     *              requested to be sent in the len parameter.
+     *              Otherwise, -1 is returned, and a specific error code
      *              can be retrieved by calling errno
      *
      */
-    int send(const char *buf, int len, int flags = 0);
+    int send(const char* buf, int len, int flags = 0);
 
 
     /**
@@ -142,15 +140,15 @@ public:
      *              to by the buf parameter.
      * @param flags A set of flags that specify the way in which the
      *              call is made.
-     * @return      If no error occurs, recv returns the number of bytes 
-     *              received and the buffer pointed to by the buf parameter 
-     *              will contain this data received. 
-     *              If the connection has been gracefully closed, 
+     * @return      If no error occurs, recv returns the number of bytes
+     *              received and the buffer pointed to by the buf parameter
+     *              will contain this data received.
+     *              If the connection has been gracefully closed,
      *              the return value is zero.
-     *              Otherwise, -1 is returned, and a specific error code 
+     *              Otherwise, -1 is returned, and a specific error code
      *             can be retrieved by calling errno
      */
-    int recv(char *buf, int len, int flags = 0);
+    int recv(char* buf, int len, int flags = 0);
 
 
     /**
@@ -189,20 +187,18 @@ private:
 /**
  * This class represents a TCP connection between a client and a server
  */
-class tcp_socket_t : public basic_socket_t
-{
+class tcp_socket_t : public basic_socket_t {
     friend class tcp_listener_t;
 
 public:
-    enum class shutdown_mode_t : int
-    {
-        DISABLE_RECV, 
-        DISABLE_SEND, 
+    enum class shutdown_mode_t : int {
+        DISABLE_RECV,
+        DISABLE_SEND,
         DISABLE_SEND_RECV
     };
 
     tcp_socket_t(const tcp_socket_t&) = delete;
-    tcp_socket_t& operator =(const tcp_socket_t&) = delete;
+    tcp_socket_t& operator=(const tcp_socket_t&) = delete;
     ~tcp_socket_t() = default;
 
     using handle_t = std::shared_ptr<tcp_socket_t>;
@@ -212,13 +208,13 @@ public:
      * Returns the local peer's ipv4 address.
      */
     std::string get_local_ip() const;
-    
+
 
     /**
      * Returns the local peer's tcp port number
      */
     port_t get_local_port() const;
-    
+
 
     /**
      * Returns the remote peer's ipv4 address.
@@ -235,34 +231,32 @@ public:
     /**
      * Disables sends or receives on this socket
      * @param how can be DISABLE_RECV to disable receive operation,
-     * DISABLE_SEND to disable send operations, DISABLE_SEND_RECV 
+     * DISABLE_SEND to disable send operations, DISABLE_SEND_RECV
      * for both send and receive operation
-     * @return If no error occurs, shutdown returns zero. 
-     * Otherwise, -1 is returned 
+     * @return If no error occurs, shutdown returns zero.
+     * Otherwise, -1 is returned
      */
     int shutdown(shutdown_mode_t how = shutdown_mode_t::DISABLE_SEND_RECV)
     {
-        return ::shutdown(get_sd(), static_cast<int>( how ));
+        return ::shutdown(get_sd(), static_cast<int>(how));
     }
 
 
     /**
      * Sends text on this socket
      */
-    tcp_socket_t& operator <<(const std::string& text);
+    tcp_socket_t& operator<<(const std::string& text);
 
 
 private:
-    std::string    _local_ip;
-    port_t         _local_port = 0;
-    std::string    _remote_ip;
-    port_t         _remote_port = 0;
+    std::string _local_ip;
+    port_t _local_port = 0;
+    std::string _remote_ip;
+    port_t _remote_port = 0;
 
     tcp_socket_t() = default;
 
-    tcp_socket_t(
-        const socket_desc_t & sd,
-        const sockaddr* local_sa,
+    tcp_socket_t(const socket_desc_t& sd, const sockaddr* local_sa,
         const sockaddr* remote_sa);
 };
 
@@ -272,8 +266,7 @@ private:
 /**
  * Listens for connections from TCP network clients.
  */
-class tcp_listener_t : public basic_socket_t
-{
+class tcp_listener_t : public basic_socket_t {
 public:
     using port_t = tcp_socket_t::port_t;
     using handle_t = std::unique_ptr<tcp_listener_t>;
@@ -284,11 +277,11 @@ public:
 
     /**
      * Returns the current state of this connection
-     * @return state_t::VALID if connection is valid, 
+     * @return state_t::VALID if connection is valid,
      *         state_t::INVALID otherwise
      */
     state_t get_state() const;
-    
+
 
     /**
      * Returns the current state of this connection
@@ -296,11 +289,11 @@ public:
      *         false otherwise
      */
     operator bool() const;
-    
+
 
     /**
      * Returns the current binding state of this connection
-     * @return bind_st_t::BOUND if connection is bound to 
+     * @return bind_st_t::BOUND if connection is bound to
      *         local address and port,
      *         bind_st_t::UNBOUND otherwise
      */
@@ -312,14 +305,14 @@ public:
      * @return the handle to a new listenr object instance
      */
     static handle_t create();
-    
+
 
     /**
-     * Associates a local IPv4 address and TCP port with this 
+     * Associates a local IPv4 address and TCP port with this
      * connection.
-     * 
+     *
      * @param ip The IPv4 address of local interface to bind to
-     * @param port The port to bind to 
+     * @param port The port to bind to
      * @return false if operation fails, true otherwise
      */
     bool bind(const std::string& ip, const port_t& port);
@@ -327,7 +320,7 @@ public:
 
     /**
      * Associates a local TCP port with this connection.
-     * 
+     *
      * @param port The port to bind to
      * @return false if operation fails, true otherwise
      */
@@ -335,17 +328,17 @@ public:
 
 
     /**
-     * Enables the listening mode, to listen for incoming 
+     * Enables the listening mode, to listen for incoming
      * connection attempts.
-     * 
+     *
      * @param backlog The maximum length of the pending connections queue.
      * @return true if operation successfully completed, false otherwise
      */
     bool listen(int backlog = SOMAXCONN);
-    
+
 
     /**
-     * Extracts the first connection on the queue of pending connections, 
+     * Extracts the first connection on the queue of pending connections,
      * and creates a new tcp connection handle
      *
      * @return an handle to a new tcp connection
@@ -368,5 +361,3 @@ private:
 
 
 #endif // __SOCKET_UTILS_H__
-
-
