@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
     bool res = httpsrv.bind(args.get_http_server_port());
 
     if (!res) {
-        std::cerr << "Error binding server port " << httpsrv.get_local_port()
+        std::cerr << "Error binding server port " << args.get_http_server_port()
                   << "\n";
         return 1;
     }
