@@ -3,7 +3,7 @@ TinyHttpServer is a lightweight web server implemented in C++11
 
 ![TinyHttpServer](https://7bcac53c-a-62cb3a1a-s-sites.googlegroups.com/site/eantcal/tinyhttp2.jpg?attachauth=ANoY7cpMFEDW4qjiNYxyezSyQyarDKg0klCmtkAwoaf2iAgU07JagzbyWL41sFilafSrhPg-U7XVlSuz9AJjVkDJAQ4NYRTcbcWdnqabRLTxVm3cSBaMU2dvYiHpOZPYs71ER-OmozI52HTyFW_VezeyBSuO4a-Tqipo-RXjF6wPVYEszNB46bd-uBHj-wqYrgigVyA3h-a8NeUKgL_AhFv5qClLTP2B3A%3D%3D&attredirects=0&height=174&width=320)
 
-TinyHttpServer is a portable tiny HTTP server implementation written in C++11 (you may compile it using either MS Visual Studio or GNU GCC) 
+TinyHttpServer is a portable tiny HTTP server implementation written in C++11 (you may compile it using either MS Visual Studio or GNU GCC).
 
 It is capable to serve multiple clients supporting GET method. 
 It has been designed mainly for educational purposes for C++ developers that can deal with a non-trivial example of C++11 programming.
@@ -29,21 +29,25 @@ The header that precedes the body is a sequence of ASCII text lines, each termin
 
 To summarize a generic HTTP request has the following format:
 
+```
 < method > < URI > < version > < CRLF >
 < header_field _1 >: < value1 > < CRLF >
 < header_field _2 >: < value2 > < CRLF >
 ...
 < header_field _N >: < valueN >< CRLF >< CRLF >
 < body ... >
+```
 
 Similarly, a generic response is formatted as follows:
 
+```
 < version > < status code > < status message > < CRLF >
 < header_field _1 >: < value1 >< CRLF >
 < header_field _2 >: < value2 >< CRLF >
 ...
 < header_field _N >: < valueN >< CRLF >< CRLF>
 < body ... >
+```
 
 Note that the last line of the header is identified by a double < CRLF > sequence. 
 In practice, the header does not have a predetermined size, but its end and the beginning of the body of the message are identified by this sequence.
@@ -56,11 +60,12 @@ This classification is called Multimedia Internet Mail Extensions (MIME) because
 The MIME classification is made by a type, a subtype and optionally a parameter. For example, plain text is normally classified by specifying the attribute 
 "Content-Type: text/plain; charset=us-ascii"
 
-A good example for understanding HTTP is TinyHttpServer is a small web server implemented using C++11.
 
 ![HTTP Server](https://sites.google.com/site/eantcal/archive/tinyhttpserver/tinyhttp.png)
 
-# Tiny HTTP Server Pseudo-code
+# Thread model
 ![HTTP Server](https://sites.google.com/site/eantcal/archive/tinyhttpserver/tinyhttp2.png)
+
+# Pseudo code
 ![HTTP Server](https://sites.google.com/site/eantcal/archive/tinyhttpserver/tinyhttp3.png)
 
