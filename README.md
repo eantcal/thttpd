@@ -10,7 +10,7 @@ It has been designed mainly for educational purposes for C++ developers that can
 
 It can be compiled for both Windows and Linux operating systems (and maybe others).
 
-# HTTP Protocol
+## HTTP Protocol
 HTTP (Hypertext Transfer Protocol, defined in RFC 2616) is the application protocol used primarily for the delivery of hypertext content on the web. 
 
 The HTTP is transaction-oriented paradigm based, in particular, on the request / response model: the client issues a request to a server that replies with a response. 
@@ -63,9 +63,9 @@ The MIME classification is made by a type, a subtype and optionally a parameter.
 
 ![HTTP Server](https://sites.google.com/site/eantcal/archive/tinyhttpserver/tinyhttp.png)
 
-# Thread model
+## Thread model
 ![HTTP Server](https://sites.google.com/site/eantcal/archive/tinyhttpserver/tinyhttp2.png)
 
-# Pseudo code
+## Pseudo code
 ![HTTP Server](https://sites.google.com/site/eantcal/archive/tinyhttpserver/tinyhttp3.png)
 
