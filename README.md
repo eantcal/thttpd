@@ -1,7 +1,7 @@
 # thttpd
 TinyHttpServer is a lightweight web server implemented in C++11
 
-![TinyHttpServer](pictures/tinyhttp1.png)
+![TinyHttpServer](tinyhttp.png)
 
 TinyHttpServer is a portable tiny HTTP server implementation written in C++11 (you may compile it using either MS Visual Studio or GNU GCC).
 
@@ -60,11 +60,11 @@ This classification is called Multimedia Internet Mail Extensions (MIME) because
 The MIME classification is made by a type, a subtype and optionally a parameter. For example, plain text is normally classified by specifying the attribute 
 "Content-Type: text/plain; charset=us-ascii"
 
-![HTTP Server](pictures/tinyhttp.png)
+![HTTP Server](tinyhttp1.png)
 
 ## Thread model
-![HTTP Server](pictures/tinyhttp2.png)
+![HTTP Server](tinyhttp2.png)
 
 ## Pseudo code
-![HTTP Server](pictures/tinyhttp3.png)
+![HTTP Server](tinyhttp3.png)
 
