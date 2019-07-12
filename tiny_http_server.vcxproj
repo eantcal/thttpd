@@ -152,19 +152,27 @@
     <Text Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\utils.h" />
-    <ClInclude Include="include/http_config.h" />
-    <ClInclude Include="include/http_server.h" />
-    <ClInclude Include="include/socket_utils.h" />
-    <ClInclude Include="include\osSocketSpecific.h" />
+    <ClInclude Include="include\HttpRequest.h" />
+    <ClInclude Include="include\HttpResponse.h" />
+    <ClInclude Include="include\TcpListener.h" />
+    <ClInclude Include="include\TcpSocket.h" />
+    <ClInclude Include="include\TransportSocket.h" />
+    <ClInclude Include="include\Tools.h" />
+    <ClInclude Include="include\config.h" />
+    <ClInclude Include="include\HttpServer.h" />
+    <ClInclude Include="include\OsSocketSupport.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cppsrc\utils.cc" />
-    <ClCompile Include="cppsrc/http_mime.cc" />
-    <ClCompile Include="cppsrc/http_server.cc" />
-    <ClCompile Include="cppsrc\osSocketSpecific.cc" />
-    <ClCompile Include="cppsrc/socket_utils.cc" />
-    <ClCompile Include="cppsrc/tiny_http_server.cc" />
+    <ClCompile Include="cppsrc\HttpRequest.cc" />
+    <ClCompile Include="cppsrc\HttpResponse.cc" />
+    <ClCompile Include="cppsrc\HttpSocket.cc" />
+    <ClCompile Include="cppsrc\TcpSocket.cc" />
+    <ClCompile Include="cppsrc\TransportSocket.cc" />
+    <ClCompile Include="cppsrc\Tools.cc" />
+    <ClCompile Include="cppsrc\HttpServer.cc" />
+    <ClCompile Include="cppsrc\OsSocketSupport.cc" />
+    <ClCompile Include="cppsrc\TcpListener.cc" />
+    <ClCompile Include="cppsrc\main.cc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

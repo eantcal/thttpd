@@ -3,7 +3,7 @@ TinyHttpServer is a lightweight web server implemented in C++11
 
 ![TinyHttpServer](pics/tinyhttp.png)
 
-TinyHttpServer is a portable tiny HTTP server implementation written in C++11 (you may compile it using either MS Visual Studio or GNU GCC).
+TinyHttpServer is a portable tiny HTTP server implementation written in C++11 (Tested on Linux, Windows and MacOS)
 
 It is capable to serve multiple clients supporting GET method. 
 It has been designed mainly for educational purposes for C++ developers that can deal with a non-trivial example of C++11 programming.
@@ -67,4 +67,3 @@ The MIME classification is made by a type, a subtype and optionally a parameter.
 
 ## Pseudo code
 ![HTTP Server](pics/tinyhttp3.png)
-

@@ -9,7 +9,7 @@
 
 /* -------------------------------------------------------------------------- */
 
-///\file http_config.h
+///\file config.h
 ///\brief HTTP Server configuration file
 
 

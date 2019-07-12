@@ -1,44 +1,36 @@
 -------------------------------------------------------------------------------
-This file is part of thttpd
-Copyright (c) Antonino Calderone (antonino.calderone@gmail.com)
+This file is part of thttpd (TinyHttpServer)
+(c) Antonino Calderone (antonino.calderone@gmail.com)
 All rights reserved.  
+
 Licensed under the MIT License. 
 See COPYING file in the project root for full license information.
 -------------------------------------------------------------------------------
 
 TinyHttpServer is a lightweight web server implemented in C++11
-The aim is to give a simple example to demonstrate what 
-C++11 has to offer.
+implemented for educational purposes.
 
-TinyHttpServer project depends on the following source files:
-
-utils.cc	Collection of general purpose utilities
-utils.h	Declaration of collection of general purpose utilities
-http_config.h   HTTP Server configuration file
-http_mime.cc	Definition of MIME table
-http_server.cc  Implementation of HTTP classes
-http_server.h   Declaration of HTTP classes
-osSocketSpecific.cc       Platform dependent code
-osSocketSpecific.h        Platform dependent code
-socket_utils.cc Implementation of socket classes containing 
-                some useful stuff cross-platform for manipulating socket
-socket_utils.h  Declaration of socket classes containing some useful stuff 
-                cross-platform for manipulating socket 
-
-tiny_http_server.vcxproj
-    This is the main project file for VC++ projects generated using an Application Wizard.
-    It contains information about the version of Visual C++ that generated the file, and
-    information about the platforms, configurations, and project features selected with the
-    Application Wizard.
-
-CMakeLists.txt
-    This is a cmakefile 
-
+You can build it either using Visual Studio for Windows or any C++ compiler
+such as g++, clang, etc. which supports C++11
 
 -------------------------------------------------------------------------------
-* Building TinyHttpServer using cmake
+* Project files
 
-Create build directory and run cmake:
+tiny_http_server.vcxproj
+ This is the main project file for VC++ projects generated using an Application 
+ Wizard. It contains information about the version of Visual C++ that generated 
+ the file, and information about the platforms, configurations, 
+ and project features selected with the Application Wizard.
+
+CMakeLists.txt
+ This is a cmakefile
+
+-------------------------------------------------------------------------------
+* How build TinyHttpServer using cmake
+
+Create build directory and run cmake using a command line similar to the 
+following one:
+
     mkdir build && cd build && cmake ..
 
 

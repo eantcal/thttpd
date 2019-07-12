@@ -9,9 +9,8 @@
 
 /* -------------------------------------------------------------------------- */
 
-#include "utils.h"
-#include "http_server.h"
-#include "socket_utils.h"
+#include "HttpServer.h"
+#include "Tools.h"
 
 #include <iostream>
 #include <string>
@@ -167,11 +166,10 @@ int main(int argc, char* argv[])
     std::string msg;
 
     // Initialize O/S specific libraries
-    if (!osSocketSpecific::initSocketLibrary(msg)) {
+    if (!OsSocketSupport::initSocketLibrary(msg)) {
         
-        if (!msg.empty()) {
+        if (!msg.empty())
             std::cerr << msg << std::endl;
-        }
 
         return 1;
     }
@@ -207,7 +205,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    std::cout << utils::getLocalTime() << std::endl
+    std::cout << Tools::getLocalTime() << std::endl
               << "Command line :'" << args.get_command_line() << "'"
               << std::endl
               << HTTP_SERVER_NAME << " is listening on TCP port "

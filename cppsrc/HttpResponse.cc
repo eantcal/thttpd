@@ -9,16 +9,110 @@
 
 /* -------------------------------------------------------------------------- */
 
-/// \file http_mime.cc
-/// \brief Definition of MIME table
+/// \file HttpResponse.cc
+/// \brief Implementation of HTTP classes
 
 
 /* -------------------------------------------------------------------------- */
 
-#include "http_server.h"
+#include "HttpResponse.h"
+#include "Tools.h"
+#include "config.h"
 
-#include <map>
-#include <string>
+
+/* -------------------------------------------------------------------------- */
+// HttpResponse
+
+
+/* -------------------------------------------------------------------------- */
+
+void HttpResponse::formatError(
+    std::string& output, int code, const std::string& msg)
+{
+    std::string scode = std::to_string(code);
+
+    std::string error_html = "<html><head><title>" + scode + " " + msg
+        + "</title></head>" + "<body>Forbidden</body></html>\r\n";
+
+    output = "HTTP/1.1 " + scode + " " + msg + "\r\n";
+    output += "Date: " + Tools::getLocalTime() + "\r\n";
+    output += "Server: " HTTP_SERVER_NAME "\r\n";
+    output += "Content-Length: " + std::to_string(error_html.size()) + "\r\n";
+    output += "Connection: Keep-Alive\r\n";
+    output += "Content-Type: text/html\r\n\r\n";
+    output += error_html;
+}
+
+
+/* -------------------------------------------------------------------------- */
+
+void HttpResponse::formatPositiveResponse(
+    std::string& response, std::string& fileTime,
+    std::string& fileExt,
+    size_t& contentLen)
+{
+
+    response = "HTTP/1.1 200 OK\r\n";
+    response += "Date: " + Tools::getLocalTime() + "\r\n";
+    response += "Server: " HTTP_SERVER_NAME "\r\n";
+    response += "Content-Length: " + std::to_string(contentLen) + "\r\n";
+    response += "Connection: Keep-Alive\r\n";
+    response += "Last Modified: " + fileTime + "\r\n";
+    response += "Content-Type: ";
+
+    // Resolve mime type using the uri/file extension
+    auto it = _mimeTbl.find(fileExt);
+
+    response
+        += it != _mimeTbl.end() ? it->second : "application/octet-stream";
+
+    // Close the rensponse header by using the sequence CRFL twice
+    response += "\r\n\r\n";
+}
+
+
+/* -------------------------------------------------------------------------- */
+
+HttpResponse::HttpResponse(
+    const HttpRequest& request, const std::string& webRootPath)
+{
+    if (request.getMethod() == HttpRequest::Method::UNKNOWN) {
+        formatError(_response, 403, "Forbidden");
+        return;
+    }
+
+    auto rpath = [](std::string& s) {
+        if (!s.empty() && s[0] != '/')
+            s = "/" + s;
+    };
+
+    _localUriPath = request.getUri();
+    rpath(_localUriPath);
+    _localUriPath = webRootPath + _localUriPath;
+
+    std::string fileTime, fileExt;
+    size_t contentLen = 0;
+
+    if (Tools::fileStat(_localUriPath, fileTime, fileExt, contentLen)) {
+        formatPositiveResponse(_response, fileTime, fileExt, contentLen);
+    } 
+    else {
+        formatError(_response, 404, "Not Found");
+    }
+}
+
+
+/* -------------------------------------------------------------------------- */
+
+std::ostream& HttpResponse::dump(std::ostream& os, const std::string& id)
+{
+    std::string ss;
+    ss = "<<< RESPONSE " + id + "\n";
+    ss += _response;
+    os << ss << "\n";
+
+    return os;
+}
 
 
 /* -------------------------------------------------------------------------- */
@@ -291,4 +385,3 @@ std::map<std::string, std::string> HttpResponse::_mimeTbl = {
 
 
 /* -------------------------------------------------------------------------- */
-
