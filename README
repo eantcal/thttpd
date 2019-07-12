@@ -1,15 +1,9 @@
 -------------------------------------------------------------------------------
-THIS SOFTWARE IS PROVIDED BY THE AUTHORS AND CONTRIBUTORS ``AS IS'' AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
-OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
+This file is part of thttpd
+Copyright (c) Antonino Calderone (antonino.calderone@gmail.com)
+All rights reserved.  
+Licensed under the MIT License. 
+See COPYING file in the project root for full license information.
 -------------------------------------------------------------------------------
 
 TinyHttpServer is a lightweight web server implemented in C++11
@@ -37,7 +31,14 @@ tiny_http_server.vcxproj
     information about the platforms, configurations, and project features selected with the
     Application Wizard.
 
-makefile
-    This is a makefile 
+CMakeLists.txt
+    This is a cmakefile 
 
-Author A. Calderone - acaldmail@gmail.com
+
+-------------------------------------------------------------------------------
+* Building TinyHttpServer using cmake
+
+Create build directory and run cmake:
+    mkdir build && cd build && cmake ..
+
+

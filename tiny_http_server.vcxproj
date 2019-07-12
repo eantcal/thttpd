@@ -78,21 +78,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
+    <Text Include="README" />
+    <Text Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="gen_utils.h" />
-    <ClInclude Include="http_config.h" />
-    <ClInclude Include="http_server.h" />
-    <ClInclude Include="socket_utils.h" />
+    <ClInclude Include="include/gen_utils.h" />
+    <ClInclude Include="include/http_config.h" />
+    <ClInclude Include="include/http_server.h" />
+    <ClInclude Include="include/socket_utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="gen_utils.cc" />
-    <ClCompile Include="http_mime.cc" />
-    <ClCompile Include="http_server.cc" />
-    <ClCompile Include="os_dep.cc" />
-    <ClCompile Include="socket_utils.cc" />
-    <ClCompile Include="tiny_http_server.cc" />
+    <ClCompile Include="cppsrc/gen_utils.cc" />
+    <ClCompile Include="cppsrc/http_mime.cc" />
+    <ClCompile Include="cppsrc/http_server.cc" />
+    <ClCompile Include="cppsrc/os_dep.cc" />
+    <ClCompile Include="cppsrc/socket_utils.cc" />
+    <ClCompile Include="cppsrc/tiny_http_server.cc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

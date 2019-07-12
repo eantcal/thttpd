@@ -1,29 +1,17 @@
-/*
- *  http_server.cc
- *
- *  This file is part of TinyHttpServer
- *
- *  TinyHttpServer is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  TinyHttpServer is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with TinyHttpServer; if not, write to the Free Software
- *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  US
- *
- *  Author:	Antonino Calderone, <acaldmail@gmail.com>
- *
- */
+//
+// This file is part of thttpd
+// Copyright (c) Antonino Calderone (antonino.calderone@gmail.com)
+// All rights reserved.  
+// Licensed under the MIT License. 
+// See COPYING file in the project root for full license information.
+//
 
+
+/* -------------------------------------------------------------------------- */
 
 /// \file http_server.cc
 /// \brief Implementation of HTTP classes
+
 
 /* -------------------------------------------------------------------------- */
 // HTTP Server
@@ -212,8 +200,8 @@ http_request_t::handle_t http_socket_t::recv()
         case crlf_t::CR2:
             s = (c == '\n') ? crlf_t::LF2 : crlf_t::IDLE;
             break;
-	default:
-	    break;
+        default:
+            break;
         }
 
         return s == crlf_t::LF2;
