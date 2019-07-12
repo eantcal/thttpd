@@ -69,8 +69,7 @@ public:
        return _err_msg; 
     }
 
-    bool show_info(std::ostream& os) const
-    {
+    bool show_info(std::ostream& os) const {
         if (_show_ver)
             os << HTTP_SERVER_NAME << " " << _maj_ver << "." << _min_ver
                << "\n";
@@ -96,12 +95,13 @@ public:
         return true;
     }
 
+    
+    /* -------------------------------------------------------------------------- */
 
     /**
      * Parse the command line
      */
-    prog_args_t(int argc, char* argv[])
-    {
+    prog_args_t(int argc, char* argv[]) {
         if (!argc)
             return;
 
@@ -156,6 +156,9 @@ public:
     }
 };
 
+
+/* -------------------------------------------------------------------------- */
+
 /**
  * Program entry point
  */
@@ -165,15 +168,17 @@ int main(int argc, char* argv[])
 
     // Initialize O/S specific libraries
     if (!os_dep::init_lib(msg)) {
-        if (!msg.empty())
+        
+        if (!msg.empty()) {
             std::cerr << msg << std::endl;
+        }
 
         return 1;
     }
 
+
     // Parse the command line
     prog_args_t args(argc, argv);
-
 
     if (!args.is_good()) {
         std::cerr << args.error() << std::endl;

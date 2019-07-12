@@ -52,7 +52,10 @@ protected:
      *
      * @param sd native socket descriptor
      */
-    basic_socket_t(const socket_desc_t& sd);
+    basic_socket_t(const socket_desc_t& sd)
+        : _socket(sd)
+    {
+    }
 
 public:
     basic_socket_t(const basic_socket_t&) = delete;
@@ -63,13 +66,18 @@ public:
     /**
      * Returns true if socket is valid, false otherwise.
      */
-    bool is_valid() const;
+    bool is_valid() const {
+        return _socket > 0;
+    }
+
 
 
     /**
      * Returns true if socket is valid, false otherwise.
      */
-    operator bool() const;
+    operator bool() const {
+        return is_valid();
+    }
 
 
     /**
@@ -97,7 +105,9 @@ public:
     /**
      * Returns the socket descriptor for this socket
      */
-    socket_desc_t get_sd() const;
+    socket_desc_t get_sd() const {
+        return _socket;
+    }
 
 
     /**
@@ -116,7 +126,9 @@ public:
      *              can be retrieved by calling errno
      *
      */
-    int send(const char* buf, int len, int flags = 0);
+    int send(const char* buf, int len, int flags = 0) {
+        return ::send(get_sd(), buf, len, flags);
+    }
 
 
     /**
@@ -135,7 +147,9 @@ public:
      *              Otherwise, -1 is returned, and a specific error code
      *             can be retrieved by calling errno
      */
-    int recv(char* buf, int len, int flags = 0);
+    int recv(char* buf, int len, int flags = 0) {
+        return ::recv(get_sd(), buf, len, flags);
+    }
 
 
     /**
@@ -148,7 +162,9 @@ public:
      *              Otherwise, -1 is returned, and a specific error code
      *              can be retrieved by errno
      */
-    int send(const std::string& text);
+    int send(const std::string& text) {
+        return send(text.c_str(), int(text.size()));
+    }
 
 
     /**
@@ -194,25 +210,33 @@ public:
     /**
      * Returns the local peer's ipv4 address.
      */
-    std::string get_local_ip() const;
+    std::string get_local_ip() const {
+        return _local_ip;
+    }
 
 
     /**
      * Returns the local peer's tcp port number
      */
-    port_t get_local_port() const;
+    port_t get_local_port() const {
+        return _local_port;
+    }
 
 
     /**
      * Returns the remote peer's ipv4 address.
      */
-    std::string get_remote_ip() const;
+    std::string get_remote_ip() const {
+        return _remote_ip;
+    }
 
 
     /**
      * Returns the remote peer's tcp port number
      */
-    port_t get_remote_port() const;
+    port_t get_remote_port() const {
+        return _remote_port;
+    }
 
 
     /**
@@ -265,7 +289,9 @@ public:
      * @return state_t::VALID if connection is valid,
      *         state_t::INVALID otherwise
      */
-    state_t get_state() const;
+    state_t get_state() const {
+        return _state;
+    }
 
 
     /**
@@ -273,7 +299,9 @@ public:
      * @return true if connection is valid,
      *         false otherwise
      */
-    operator bool() const;
+    operator bool() const {
+        return get_state() != state_t::INVALID;
+    }
 
 
     /**
@@ -282,14 +310,18 @@ public:
      *         local address and port,
      *         bind_st_t::UNBOUND otherwise
      */
-    bind_st_t get_bind_state() const;
+    bind_st_t get_bind_state() const {
+        return _bind_st;
+    }
 
 
     /**
      * Returns a handle to a new listener object
      * @return the handle to a new listenr object instance
      */
-    static handle_t create();
+    static handle_t create() {
+        return handle_t(new tcp_listener_t());
+    }
 
 
     /**
@@ -309,7 +341,9 @@ public:
      * @param port The port to bind to
      * @return false if operation fails, true otherwise
      */
-    bool bind(const port_t& port);
+    bool bind(const port_t& port) {
+        return bind("", port);
+    }
 
 
     /**
@@ -319,7 +353,9 @@ public:
      * @param backlog The maximum length of the pending connections queue.
      * @return true if operation successfully completed, false otherwise
      */
-    bool listen(int backlog = SOMAXCONN);
+    bool listen(int backlog = SOMAXCONN) {
+        return ::listen(get_sd(), backlog) == 0;
+    }
 
 
     /**

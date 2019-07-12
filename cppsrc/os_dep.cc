@@ -50,7 +50,9 @@ bool os_dep::init_lib(std::string& msg)
 
 /* -------------------------------------------------------------------------- */
 
-int os_dep::close_socket(int sd) { return ::closesocket(sd); }
+int os_dep::close_socket(int sd) { 
+    return ::closesocket(sd); 
+}
 
 
 /* -------------------------------------------------------------------------- */
@@ -64,12 +66,16 @@ int os_dep::close_socket(int sd) { return ::closesocket(sd); }
 
 /* -------------------------------------------------------------------------- */
 
-bool os_dep::init_lib(std::string& msg) { return true; }
+bool os_dep::init_lib(std::string&) { 
+    return true; 
+}
 
 
 /* -------------------------------------------------------------------------- */
 
-int os_dep::close_socket(int sd) { return ::close(sd); }
+int os_dep::close_socket(int sd) { 
+    return ::close(sd); 
+}
 
 
 /* -------------------------------------------------------------------------- */
