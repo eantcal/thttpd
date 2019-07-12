@@ -22,8 +22,7 @@
  */
 
 
-// -----------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 #include "gen_utils.h"
 #include "http_server.h"
@@ -33,8 +32,7 @@
 #include <string>
 
 
-// -----------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 class prog_args_t {
 private:
@@ -55,29 +53,34 @@ public:
     prog_args_t() = delete;
 
 
-    inline const std::string& get_prog_name() const { return _prog_name; }
+    const std::string& get_prog_name() const { 
+       return _prog_name; 
+    }
 
+    const std::string& get_command_line() const { 
+       return _command_line; 
+    }
 
-    inline const std::string& get_command_line() const { return _command_line; }
+    const std::string& get_web_root() const { 
+       return _web_root; 
+    }
 
-
-    inline const std::string& get_web_root() const { return _web_root; }
-
-
-    inline tcp_socket_t::port_t get_http_server_port() const
-    {
+    tcp_socket_t::port_t get_http_server_port() const {
         return _http_server_port;
     }
 
 
-    inline bool is_good() const { return !_error; }
+    bool is_good() const { 
+       return !_error; 
+    }
 
+    bool verbose_mode() const { 
+       return _verbose_mode; 
+    }
 
-    inline bool verbose_mode() const { return _verbose_mode; }
-
-
-    inline const std::string& error() const { return _err_msg; }
-
+    const std::string& error() const { 
+       return _err_msg; 
+    }
 
     bool show_info(std::ostream& os) const
     {

@@ -25,15 +25,13 @@
 /// \brief Collection of general purpose utilities
 
 
-// -----------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 #include "gen_utils.h"
 #include "os_dep.h"
 
 
-// -----------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 void gen_utils::convert_duration_in_timeval(const timeout_t& d, timeval& tv)
 {
@@ -49,8 +47,7 @@ void gen_utils::convert_duration_in_timeval(const timeout_t& d, timeval& tv)
 }
 
 
-// -----------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 void gen_utils::get_local_time(std::string& local_time)
 {
@@ -61,8 +58,7 @@ void gen_utils::get_local_time(std::string& local_time)
 }
 
 
-// -----------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 void gen_utils::remove_last_ch_if(std::string& s, char c)
 {
@@ -71,7 +67,7 @@ void gen_utils::remove_last_ch_if(std::string& s, char c)
 }
 
 
-// -----------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
 
 bool gen_utils::file_stat(const std::string& filename, std::string& date_time,
     std::string& ext, size_t& fsize)
@@ -97,12 +93,7 @@ bool gen_utils::file_stat(const std::string& filename, std::string& date_time,
 }
 
 
-// ---------------------------------------------------------------------------
-
-
-// The regex library still seems to be mostly not implemented in libstdc++
-
-#ifndef _USE_REGEX_
+/* -------------------------------------------------------------------------- */
 
 bool gen_utils::split_line_in_tokens(const std::string& line,
     std::vector<std::string>& tokens, const std::string& sep)
@@ -130,30 +121,4 @@ bool gen_utils::split_line_in_tokens(const std::string& line,
     return true;
 }
 
-#else
 
-// implemented using regex
-
-bool gen_utils::split_line_in_tokens(const std::string& line,
-    std::vector<std::string>& tokens, const std::string& sep)
-{
-    std::regex regexp(sep);
-    std::sregex_token_iterator i(line.begin(), line.end(), regexp, -1), LAST;
-
-    try {
-        while (i != LAST) {
-            if (i->first != line.end())
-                tokens.push_back(i->str());
-            ++i;
-        }
-    } catch (const std::regex_error&) {
-        return false;
-    }
-    return true;
-}
-
-
-#endif
-
-
-// ---------------------------------------------------------------------------

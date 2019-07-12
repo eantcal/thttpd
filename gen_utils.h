@@ -26,15 +26,13 @@
 /// \brief Collection of general purpose utilities
 
 
-// -----------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 #ifndef __GEN_UTILS_H__
 #define __GEN_UTILS_H__
 
 
-// -----------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 #include <chrono>
 #include <regex>
@@ -43,14 +41,18 @@
 
 #include "os_dep.h"
 
+
+/* -------------------------------------------------------------------------- */
+
 namespace gen_utils {
 
 
-// ------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 using timeout_t = std::chrono::system_clock::duration;
 
+
+/* -------------------------------------------------------------------------- */
 
 /**
 * Convert a timeval object into standard duration object
@@ -61,8 +63,7 @@ using timeout_t = std::chrono::system_clock::duration;
 void convert_duration_in_timeval(const timeout_t& d, timeval& tv);
 
 
-// ------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 /**
  * Get the system time, corrected for the local time zone
@@ -74,8 +75,7 @@ void convert_duration_in_timeval(const timeout_t& d, timeval& tv);
 void get_local_time(std::string& local_time);
 
 
-// ------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 /**
  * Get the system time, corrected for the local time zone
@@ -92,8 +92,7 @@ inline std::string get_local_time()
 }
 
 
-// ------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 /**
  *  Removes any instances of character c if present at the end of the string s
@@ -104,8 +103,7 @@ inline std::string get_local_time()
 void remove_last_ch_if(std::string& s, char c);
 
 
-// ------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 /**
  *  Returns file attributes of filename.
@@ -119,8 +117,7 @@ bool file_stat(const std::string& filename, std::string& date_time,
     std::string& ext, size_t& fsize);
 
 
-// ------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 /**
  *  Returns file size
@@ -132,14 +129,15 @@ inline size_t file_size(const std::string& filename)
 {
     std::string date_time;
     std::string ext;
-    size_t fsize;
-    bool ok = file_stat(filename, date_time, ext, fsize);
+    size_t fsize = 0;
+
+    const bool ok = file_stat(filename, date_time, ext, fsize);
+
     return ok ? fsize : -1;
 }
 
 
-// ------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 /**
 *  Returns true if file/directory filename exists
@@ -151,13 +149,13 @@ inline bool file_exist(const std::string& filename)
 {
     std::string date_time;
     std::string ext;
-    size_t fsize;
+    size_t fsize = 0;
+
     return file_stat(filename, date_time, ext, fsize);
 }
 
 
-// ------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 /**
  * Split text line in a vector of tokens.
@@ -175,4 +173,7 @@ bool split_line_in_tokens(const std::string& line,
 } // namespace gen_utils
 
 
+/* -------------------------------------------------------------------------- */
+
 #endif // __GEN_UTILS_H__
+

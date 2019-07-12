@@ -17,22 +17,20 @@
 *  along with TinyHttpServer; if not, write to the Free Software
 *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  US
 *
-*  Author:	Antonino Calderone, <acaldmail@gmail.com>
+*  Author: Antonino Calderone, <acaldmail@gmail.com>
 *
 */
 #ifndef __HTTP_SERVER_H__
 #define __HTTP_SERVER_H__
 
 
-// -----------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 /// \file http_server.h
 /// \brief Declaration of HTTP classes
 
 
-// -----------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 #include "http_config.h"
 #include "socket_utils.h"
@@ -44,8 +42,8 @@
 #include <string>
 #include <vector>
 
-// -----------------------------------------------------------------------------
 
+/* -------------------------------------------------------------------------- */
 
 /**
  * Encapsulates HTTP style request, consisting of a request line,
@@ -65,25 +63,33 @@ public:
     /**
      * Returns the request headers
      */
-    inline const std::list<std::string>& get_header() const { return _header; }
+    const std::list<std::string>& get_header() const { 
+       return _header; 
+    }
 
 
     /**
      * Returns the method of the command line (GET, HEAD, ...)
      */
-    inline method_t get_method() const { return _method; }
+    method_t get_method() const { 
+       return _method; 
+    }
 
 
     /**
      * Returns the HTTP version (HTTP/1.0, HTTP/1.1, ...)
      */
-    inline version_t get_version() const { return _version; }
+    version_t get_version() const { 
+       return _version; 
+    }
 
 
     /**
      * Returns the command line URI
      */
-    inline const std::string& get_uri() const { return _uri; }
+    const std::string& get_uri() const { 
+       return _uri; 
+    }
 
 
     /**
@@ -99,8 +105,7 @@ public:
      *
      * @param uri The input string to parse
      */
-    inline void parse_uri(const std::string& uri)
-    {
+    void parse_uri(const std::string& uri) {
         _uri = uri == "/" ? HTTP_SERVER_INDEX : uri;
     }
 
@@ -118,8 +123,7 @@ public:
      *
      * @param new_header The header content to add to headers fields
      */
-    inline void add_header(const std::string& new_header)
-    {
+    void add_header(const std::string& new_header) {
         _header.push_back(new_header);
     }
 
@@ -142,9 +146,11 @@ private:
 };
 
 
-// -----------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
 // http_response_t
-// -----------------------------------------------------------------------------
+
+
+/* -------------------------------------------------------------------------- */
 
 /**
  * Encapsulates HTTP style response, consisting of a status line,
@@ -166,14 +172,15 @@ public:
     /**
      * Returns the content of response status line and response headers
      */
-    inline operator const std::string&() const { return _response; }
+    operator const std::string&() const { 
+       return _response; 
+    }
 
 
     /**
      * Returns the content of local resource related to the URI requested
      */
-    inline const std::string& get_local_uri_path() const
-    {
+    const std::string& get_local_uri_path() const {
         return _local_uri_path;
     }
 
@@ -199,6 +206,8 @@ private:
 };
 
 
+/* -------------------------------------------------------------------------- */
+
 /**
  * This class represents an HTTP connection between a client and a server
  */
@@ -216,7 +225,7 @@ public:
     /**
      * Construct the HTTP connection starting from TCP connected-socket handle
      */
-    inline http_socket_t(tcp_socket_t::handle_t handle)
+    http_socket_t(tcp_socket_t::handle_t handle)
         : _socket_handle(handle)
     {
     }
@@ -231,15 +240,16 @@ public:
     /**
      * Returns TCP socket handle
      */
-    inline operator tcp_socket_t::handle_t() const { return _socket_handle; }
+    operator tcp_socket_t::handle_t() const { 
+       return _socket_handle; 
+    }
 
 
     /**
      * Receives an HTTP request from remote peer
      * @param the handle of http request object
      */
-    inline http_socket_t& operator>>(http_request_t::handle_t& handle)
-    {
+    http_socket_t& operator>>(http_request_t::handle_t& handle) {
         handle = recv();
         return *this;
     }
@@ -249,7 +259,9 @@ public:
      * Returns false if last recv/send operation detected
      * that connection was down; true otherwise
      */
-    inline explicit operator bool() const { return _conn_up; }
+    explicit operator bool() const { 
+       return _conn_up; 
+    }
 
 
     /**
@@ -265,15 +277,13 @@ public:
      *
      * @param response The HTTP response
      */
-    inline int send_file(const std::string& filename)
-    {
+    int send_file(const std::string& filename) {
         return _socket_handle->send_file(filename);
     }
 };
 
 
-// -----------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 /**
  * The top-level class of the HTTP server
@@ -303,8 +313,7 @@ public:
      *
      * @param pointer to ostream used for logging
      */
-    inline void set_logger(std::ostream* logger_ptr = nullptr)
-    {
+    void set_logger(std::ostream* logger_ptr = nullptr) {
         if (logger_ptr) {
             _logger_ptr = logger_ptr;
             _verbose_mode = true;
@@ -328,23 +337,26 @@ public:
     /**
      * Gets current server working directory
      */
-    inline const std::string& get_web_root() const { return _web_root; }
+    const std::string& get_web_root() const { 
+       return _web_root; 
+    }
 
 
     /**
      * Sets the server working directory
      */
-    inline void set_web_root(const std::string& web_root)
-    {
+    void set_web_root(const std::string& web_root) {
         _web_root = web_root;
     }
 
 
     /**
-     * Gets the server listening port
+     * Gets port where server is listening
      * @return the port number
      */
-    inline const port_t get_local_port() const { return _server_port; }
+    const port_t get_local_port() const { 
+       return _server_port; 
+    }
 
 
     /**
@@ -390,11 +402,12 @@ protected:
      * an error occurs.
      * @return a handle to tcp socket
      */
-    tcp_socket_t::handle_t accept() { return _tcp_server->accept(); }
+    tcp_socket_t::handle_t accept() { 
+       return _tcp_server->accept(); 
+    }
 };
 
 
-// -----------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 #endif // __HTTP_SERVER_H__

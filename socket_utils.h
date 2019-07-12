@@ -27,12 +27,13 @@
 /// useful stuff cross-platform for manipulating socket
 
 
+/* -------------------------------------------------------------------------- */
+
 #ifndef __SOCKET_UTILS_H__
 #define __SOCKET_UTILS_H__
 
 
-// -----------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 #include <atomic>
 #include <chrono>
@@ -44,8 +45,7 @@
 #include "os_dep.h"
 
 
-// -----------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 /**
  * Provides socket functionality
@@ -182,7 +182,7 @@ private:
 };
 
 
-// -----------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
 
 /**
  * This class represents a TCP connection between a client and a server
@@ -236,8 +236,7 @@ public:
      * @return If no error occurs, shutdown returns zero.
      * Otherwise, -1 is returned
      */
-    int shutdown(shutdown_mode_t how = shutdown_mode_t::DISABLE_SEND_RECV)
-    {
+    int shutdown(shutdown_mode_t how = shutdown_mode_t::DISABLE_SEND_RECV) {
         return ::shutdown(get_sd(), static_cast<int>(how));
     }
 
@@ -247,6 +246,7 @@ public:
      */
     tcp_socket_t& operator<<(const std::string& text);
 
+    tcp_socket_t() = delete;
 
 private:
     std::string _local_ip;
@@ -254,14 +254,12 @@ private:
     std::string _remote_ip;
     port_t _remote_port = 0;
 
-    tcp_socket_t() = default;
-
     tcp_socket_t(const socket_desc_t& sd, const sockaddr* local_sa,
         const sockaddr* remote_sa);
 };
 
 
-// -----------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
 
 /**
  * Listens for connections from TCP network clients.
@@ -357,7 +355,7 @@ private:
 };
 
 
-// -----------------------------------------------------------------------------
-
+/* -------------------------------------------------------------------------- */
 
 #endif // __SOCKET_UTILS_H__
+
