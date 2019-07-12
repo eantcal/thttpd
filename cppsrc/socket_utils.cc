@@ -19,8 +19,9 @@
 
 /* -------------------------------------------------------------------------- */
 
+#include "osSocketSpecific.h"
+#include "utils.h"
 #include "socket_utils.h"
-#include "gen_utils.h"
 
 #include <memory>
 #include <string.h>
@@ -28,45 +29,45 @@
 
 
 /* -------------------------------------------------------------------------- */
-// basic_socket_t
+// TransportSocket
 
 /* -------------------------------------------------------------------------- */
 
-basic_socket_t::~basic_socket_t()
+TransportSocket::~TransportSocket()
 {
-    if (is_valid())
-        os_dep::close_socket(get_sd());
+    if (isValid())
+        osSocketSpecific::closeSocketFd(getSocketFd());
 }
 
 
 /* -------------------------------------------------------------------------- */
 
-basic_socket_t::wait_ev_t basic_socket_t::wait_for_recv_event(
-    const basic_socket_t::timeout_t& timeout)
+TransportSocket::WaitingEvent TransportSocket::waitForRecvEvent(
+    const TransportSocket::TimeoutInterval& timeout)
 {
     struct timeval tv_timeout = { 0 };
-    gen_utils::convert_duration_in_timeval(timeout, tv_timeout);
+    utils::convertDurationInTimeval(timeout, tv_timeout);
 
     fd_set rd_mask;
 
     // Add socket to receive select mask
     FD_ZERO(&rd_mask);
-    FD_SET(get_sd(), &rd_mask);
+    FD_SET(getSocketFd(), &rd_mask);
 
     long nd = select(FD_SETSIZE, &rd_mask, (fd_set*)0, (fd_set*)0, &tv_timeout);
 
     if (nd == 0)
-        return wait_ev_t::TIMEOUT;
+        return WaitingEvent::TIMEOUT;
     else if (nd < 0)
-        return wait_ev_t::RECV_ERROR;
+        return WaitingEvent::RECV_ERROR;
 
-    return wait_ev_t::RECV_DATA;
+    return WaitingEvent::RECV_DATA;
 }
 
 
 /* -------------------------------------------------------------------------- */
 
-int basic_socket_t::send_file(const std::string& filepath)
+int TransportSocket::sendFile(const std::string& filepath)
 {
     std::ifstream ifs(filepath.c_str(), std::ios::in | std::ios::binary);
 
@@ -111,11 +112,11 @@ int basic_socket_t::send_file(const std::string& filepath)
 
 
 /* -------------------------------------------------------------------------- */
-// tcp_socket_t
+// TcpSocket
 
 /* -------------------------------------------------------------------------- */
 
-tcp_socket_t& tcp_socket_t::operator<<(const std::string& text)
+TcpSocket& TcpSocket::operator<<(const std::string& text)
 {
     send(text);
     return *this;
@@ -124,11 +125,11 @@ tcp_socket_t& tcp_socket_t::operator<<(const std::string& text)
 
 /* -------------------------------------------------------------------------- */
 
-tcp_socket_t::tcp_socket_t(const socket_desc_t& sd, const sockaddr* local_sa,
+TcpSocket::TcpSocket(const SocketFd& sd, const sockaddr* local_sa,
     const sockaddr* remote_sa)
-    : basic_socket_t(sd)
+    : TransportSocket(sd)
 {
-    auto conv = [](port_t& port, std::string& ip, const sockaddr* sa) {
+    auto conv = [](TranspPort& port, std::string& ip, const sockaddr* sa) {
         port = htons(reinterpret_cast<const sockaddr_in*>(sa)->sin_port);
         ip = std::string(
             inet_ntoa(reinterpret_cast<const sockaddr_in*>(sa)->sin_addr));
@@ -140,14 +141,14 @@ tcp_socket_t::tcp_socket_t(const socket_desc_t& sd, const sockaddr* local_sa,
 
 
 /* -------------------------------------------------------------------------- */
-// tcp_listener_t
+// TcpListener
 
 /* -------------------------------------------------------------------------- */
 
-tcp_listener_t::tcp_listener_t()
-    : basic_socket_t(int(::socket(AF_INET, SOCK_STREAM, 0)))
-    , _state(is_valid() ? state_t::VALID : state_t::INVALID)
-    , _bind_st(bind_st_t::UNBOUND)
+TcpListener::TcpListener()
+    : TransportSocket(int(::socket(AF_INET, SOCK_STREAM, 0)))
+    , _state(isValid() ? State::VALID : State::INVALID)
+    , _bind_st(BindingState::UNBOUND)
 {
     memset(&_local_ip_port_sa_in, 0, sizeof(_local_ip_port_sa_in));
 }
@@ -155,9 +156,9 @@ tcp_listener_t::tcp_listener_t()
 
 /* -------------------------------------------------------------------------- */
 
-bool tcp_listener_t::bind(const std::string& ip, const port_t& port)
+bool TcpListener::bind(const std::string& ip, const TranspPort& port)
 {
-    if (get_sd() <= 0)
+    if (getSocketFd() <= 0)
         return false;
 
     sockaddr_in& sin = _local_ip_port_sa_in;
@@ -166,8 +167,8 @@ bool tcp_listener_t::bind(const std::string& ip, const port_t& port)
     sin.sin_addr.s_addr = ip.empty() ? INADDR_ANY : inet_addr(ip.c_str());
     sin.sin_port = htons(port);
 
-    if (0 == ::bind(get_sd(), reinterpret_cast<const sockaddr*>(&sin), sizeof(sin))) {
-        _bind_st = bind_st_t::BOUND;
+    if (0 == ::bind(getSocketFd(), reinterpret_cast<const sockaddr*>(&sin), sizeof(sin))) {
+        _bind_st = BindingState::BOUND;
         return true;
     }
 
@@ -177,10 +178,10 @@ bool tcp_listener_t::bind(const std::string& ip, const port_t& port)
 
 /* -------------------------------------------------------------------------- */
 
-tcp_socket_t::handle_t tcp_listener_t::accept()
+TcpSocket::Handle TcpListener::accept()
 {
-    if (get_state() != state_t::VALID)
-        return tcp_socket_t::handle_t();
+    if (getState() != State::VALID)
+        return TcpSocket::Handle();
 
     sockaddr remote_sockaddr = { 0 };
 
@@ -189,10 +190,10 @@ tcp_socket_t::handle_t tcp_listener_t::accept()
 
     socklen_t sockaddrlen = sizeof(struct sockaddr);
 
-    socket_desc_t sd = int(::accept(get_sd(), &remote_sockaddr, &sockaddrlen));
+    SocketFd sd = int(::accept(getSocketFd(), &remote_sockaddr, &sockaddrlen));
 
-    tcp_socket_t::handle_t handle = tcp_socket_t::handle_t(sd > 0
-            ? new tcp_socket_t(sd, local_sockaddr, &remote_sockaddr)
+    TcpSocket::Handle handle = TcpSocket::Handle(sd > 0
+            ? new TcpSocket(sd, local_sockaddr, &remote_sockaddr)
             : nullptr);
 
     return handle;

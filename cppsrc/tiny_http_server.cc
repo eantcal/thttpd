@@ -9,7 +9,7 @@
 
 /* -------------------------------------------------------------------------- */
 
-#include "gen_utils.h"
+#include "utils.h"
 #include "http_server.h"
 #include "socket_utils.h"
 
@@ -23,14 +23,14 @@ class prog_args_t {
 private:
     std::string _prog_name;
     std::string _command_line;
-    std::string _web_root = HTTP_SERVER_WROOT;
+    std::string _webRootPath = HTTP_SERVER_WROOT;
 
-    tcp_socket_t::port_t _http_server_port = HTTP_SERVER_PORT;
+    TcpSocket::TranspPort _http_server_port = HTTP_SERVER_PORT;
     
     bool _show_help = false;
     bool _show_ver = false;
     bool _error = false;
-    bool _verbose_mode = false;
+    bool _verboseModeOn = false;
     std::string _err_msg;
 
     static const int _min_ver = HTTP_SERVER_MIN_V;
@@ -48,11 +48,11 @@ public:
        return _command_line; 
     }
 
-    const std::string& get_web_root() const { 
-       return _web_root; 
+    const std::string& getWebRootPath() const { 
+       return _webRootPath; 
     }
 
-    tcp_socket_t::port_t get_http_server_port() const {
+    TcpSocket::TranspPort get_http_server_port() const {
         return _http_server_port;
     }
 
@@ -61,8 +61,8 @@ public:
        return !_error; 
     }
 
-    bool verbose_mode() const { 
-       return _verbose_mode; 
+    bool verboseModeOn() const { 
+       return _verboseModeOn; 
     }
 
     const std::string& error() const { 
@@ -111,7 +111,7 @@ public:
         if (argc <= 1)
             return;
 
-        enum class state_t { OPTION, PORT, WEBROOT } state = state_t::OPTION;
+        enum class State { OPTION, PORT, WEBROOT } state = State::OPTION;
 
         for (int idx = 1; idx < argc; ++idx) {
             std::string sarg = argv[idx];
@@ -120,20 +120,20 @@ public:
             _command_line += sarg;
 
             switch (state) {
-            case state_t::OPTION:
+            case State::OPTION:
                 if (sarg == "--port" || sarg == "-p") {
-                    state = state_t::PORT;
+                    state = State::PORT;
                 } else if (sarg == "--webroot" || sarg == "-w") {
-                    state = state_t::WEBROOT;
+                    state = State::WEBROOT;
                 } else if (sarg == "--help" || sarg == "-h") {
                     _show_help = true;
-                    state = state_t::OPTION;
+                    state = State::OPTION;
                 } else if (sarg == "--version" || sarg == "-v") {
                     _show_ver = true;
-                    state = state_t::OPTION;
+                    state = State::OPTION;
                 } else if (sarg == "--verbose" || sarg == "-vv") {
-                    _verbose_mode = true;
-                    state = state_t::OPTION;
+                    _verboseModeOn = true;
+                    state = State::OPTION;
                 } else {
                     _err_msg = "Unknown option '" + sarg
                         + "', try with --help or -h";
@@ -142,14 +142,14 @@ public:
                 }
                 break;
 
-            case state_t::WEBROOT:
-                _web_root = sarg;
-                state = state_t::OPTION;
+            case State::WEBROOT:
+                _webRootPath = sarg;
+                state = State::OPTION;
                 break;
 
-            case state_t::PORT:
+            case State::PORT:
                 _http_server_port = std::stoi(sarg);
-                state = state_t::OPTION;
+                state = State::OPTION;
                 break;
             }
         }
@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
     std::string msg;
 
     // Initialize O/S specific libraries
-    if (!os_dep::init_lib(msg)) {
+    if (!osSocketSpecific::initSocketLibrary(msg)) {
         
         if (!msg.empty()) {
             std::cerr << msg << std::endl;
@@ -189,9 +189,9 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    http_server_t& httpsrv = http_server_t::get_instance();
+    HttpServer& httpsrv = HttpServer::getInstance();
 
-    httpsrv.set_web_root(args.get_web_root());
+    httpsrv.setupWebRootPath(args.getWebRootPath());
 
     bool res = httpsrv.bind(args.get_http_server_port());
 
@@ -207,14 +207,14 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    std::cout << gen_utils::get_local_time() << std::endl
+    std::cout << utils::getLocalTime() << std::endl
               << "Command line :'" << args.get_command_line() << "'"
               << std::endl
               << HTTP_SERVER_NAME << " is listening on TCP port "
               << args.get_http_server_port() << std::endl
-              << "Working directory is '" << args.get_web_root() << "'\n";
+              << "Working directory is '" << args.getWebRootPath() << "'\n";
 
-    httpsrv.set_logger(args.verbose_mode() ? &std::clog : nullptr);
+    httpsrv.setupLogger(args.verboseModeOn() ? &std::clog : nullptr);
 
     if (!httpsrv.run()) {
         std::cerr << "Error starting the server\n";

@@ -12,14 +12,14 @@ C++11 has to offer.
 
 TinyHttpServer project depends on the following source files:
 
-gen_utils.cc	Collection of general purpose utilities
-gen_utils.h	Declaration of collection of general purpose utilities
+utils.cc	Collection of general purpose utilities
+utils.h	Declaration of collection of general purpose utilities
 http_config.h   HTTP Server configuration file
 http_mime.cc	Definition of MIME table
 http_server.cc  Implementation of HTTP classes
 http_server.h   Declaration of HTTP classes
-os_dep.cc       Platform dependent code
-os_dep.h        Platform dependent code
+osSocketSpecific.cc       Platform dependent code
+osSocketSpecific.h        Platform dependent code
 socket_utils.cc Implementation of socket classes containing 
                 some useful stuff cross-platform for manipulating socket
 socket_utils.h  Declaration of socket classes containing some useful stuff 

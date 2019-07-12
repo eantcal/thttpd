@@ -152,16 +152,17 @@
     <Text Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include/gen_utils.h" />
+    <ClInclude Include="include\utils.h" />
     <ClInclude Include="include/http_config.h" />
     <ClInclude Include="include/http_server.h" />
     <ClInclude Include="include/socket_utils.h" />
+    <ClInclude Include="include\osSocketSpecific.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cppsrc/gen_utils.cc" />
+    <ClCompile Include="cppsrc\utils.cc" />
     <ClCompile Include="cppsrc/http_mime.cc" />
     <ClCompile Include="cppsrc/http_server.cc" />
-    <ClCompile Include="cppsrc/os_dep.cc" />
+    <ClCompile Include="cppsrc\osSocketSpecific.cc" />
     <ClCompile Include="cppsrc/socket_utils.cc" />
     <ClCompile Include="cppsrc/tiny_http_server.cc" />
   </ItemGroup>

@@ -37,15 +37,15 @@
  * Encapsulates HTTP style request, consisting of a request line,
  * some headers, and a content body
  */
-class http_request_t {
+class HttpRequest {
 public:
-    using handle_t = std::shared_ptr<http_request_t>;
+    using Handle = std::shared_ptr<HttpRequest>;
 
-    enum class method_t { GET, HEAD, POST, UNKNOWN };
-    enum class version_t { HTTP_1_0, HTTP_1_1, UNKNOWN };
+    enum class Method { GET, HEAD, POST, UNKNOWN };
+    enum class Version { HTTP_1_0, HTTP_1_1, UNKNOWN };
 
-    http_request_t() = default;
-    http_request_t(const http_request_t&) = default;
+    HttpRequest() = default;
+    HttpRequest(const HttpRequest&) = default;
 
 
     /**
@@ -55,66 +55,58 @@ public:
        return _header; 
     }
 
-
     /**
      * Returns the method of the command line (GET, HEAD, ...)
      */
-    method_t get_method() const { 
+    Method getMethod() const { 
        return _method; 
     }
-
 
     /**
      * Returns the HTTP version (HTTP/1.0, HTTP/1.1, ...)
      */
-    version_t get_version() const { 
+    Version getVersion() const { 
        return _version; 
     }
-
 
     /**
      * Returns the command line URI
      */
-    const std::string& get_uri() const { 
+    const std::string& getUri() const { 
        return _uri; 
     }
-
 
     /**
      * Set HTTP method field decoding the string method
      *
      * @param method The input string to parse
      */
-    void parse_method(const std::string& method);
-
+    void parseMethod(const std::string& method);
 
     /**
      * Set HTTP URI field decoding the string uri
      *
      * @param uri The input string to parse
      */
-    void parse_uri(const std::string& uri) {
+    void parseUri(const std::string& uri) {
         _uri = uri == "/" ? HTTP_SERVER_INDEX : uri;
     }
-
 
     /**
      * Set HTTP version field decoding the string ver
      *
      * @param ver The input string to parse
      */
-    void parse_version(const std::string& ver);
-
+    void parseVersion(const std::string& ver);
 
     /**
      * Add a new header to request
      *
      * @param new_header The header content to add to headers fields
      */
-    void add_header(const std::string& new_header) {
+    void addHeader(const std::string& new_header) {
         _header.push_back(new_header);
     }
-
 
     /**
      * Prints the request out to the os stream
@@ -125,17 +117,16 @@ public:
      */
     std::ostream& dump(std::ostream& os, const std::string& id = "");
 
-
 private:
     std::list<std::string> _header;
-    method_t _method = method_t::UNKNOWN;
-    version_t _version = version_t::UNKNOWN;
+    Method _method = Method::UNKNOWN;
+    Version _version = Version::UNKNOWN;
     std::string _uri;
 };
 
 
 /* -------------------------------------------------------------------------- */
-// http_response_t
+// HttpResponse
 
 
 /* -------------------------------------------------------------------------- */
@@ -144,18 +135,18 @@ private:
  * Encapsulates HTTP style response, consisting of a status line,
  * some headers, and a content body
  */
-class http_response_t {
+class HttpResponse {
 public:
-    http_response_t() = delete;
-    http_response_t(const http_response_t&) = default;
-    http_response_t& operator=(const http_response_t&) = default;
+    HttpResponse() = delete;
+    HttpResponse(const HttpResponse&) = default;
+    HttpResponse& operator=(const HttpResponse&) = default;
 
     /**
      * Construct a response to a request
      * @param request an http request
-     * @param web_root local working directory of the web server
+     * @param webRootPath local working directory of the web server
      */
-    http_response_t(const http_request_t& request, const std::string& web_root);
+    HttpResponse(const HttpRequest& request, const std::string& webRootPath);
 
     /**
      * Returns the content of response status line and response headers
@@ -164,14 +155,12 @@ public:
        return _response; 
     }
 
-
     /**
      * Returns the content of local resource related to the URI requested
      */
-    const std::string& get_local_uri_path() const {
-        return _local_uri_path;
+    const std::string& getLocalUriPath() const {
+        return _localUriPath;
     }
-
 
     /**
      * Prints the response out to os stream
@@ -183,14 +172,23 @@ public:
     std::ostream& dump(std::ostream& os, const std::string& id = "");
 
 private:
-    static std::map<std::string, std::string> _mime_tbl;
+    static std::map<std::string, std::string> _mimeTbl;
 
     std::string _response;
-    std::string _local_uri_path;
+    std::string _localUriPath;
 
     // Format an error response
-    static void format_error(
-        std::string& output, int code, const std::string& msg);
+    static void formatError(
+        std::string& output, 
+        int code, 
+        const std::string& msg);
+
+    // Format an positive response
+    static void formatPositiveResponse(
+        std::string& response, 
+        std::string& fileTime,
+        std::string& fileExt,
+        size_t& contentLen);
 };
 
 
@@ -199,74 +197,68 @@ private:
 /**
  * This class represents an HTTP connection between a client and a server
  */
-class http_socket_t {
+class HttpSocket {
 private:
-    tcp_socket_t::handle_t _socket_handle;
-    bool _conn_up = true;
-    http_request_t::handle_t recv();
+    TcpSocket::Handle _socketHandle;
+    bool _connUp = true;
+    HttpRequest::Handle recv();
 
 public:
-    http_socket_t() = default;
-    http_socket_t(const http_socket_t&) = default;
-
+    HttpSocket() = default;
+    HttpSocket(const HttpSocket&) = default;
 
     /**
      * Construct the HTTP connection starting from TCP connected-socket handle
      */
-    http_socket_t(tcp_socket_t::handle_t handle)
-        : _socket_handle(handle)
+    HttpSocket(TcpSocket::Handle handle)
+        : _socketHandle(handle)
     {
     }
-
 
     /**
      * Assigns a new TCP connected socket handle to this HTTP socket
      */
-    http_socket_t& operator=(tcp_socket_t::handle_t handle);
-
+    HttpSocket& operator=(TcpSocket::Handle handle);
 
     /**
      * Returns TCP socket handle
      */
-    operator tcp_socket_t::handle_t() const { 
-       return _socket_handle; 
+    operator TcpSocket::Handle() const { 
+       return _socketHandle; 
     }
-
 
     /**
      * Receives an HTTP request from remote peer
      * @param the handle of http request object
      */
-    http_socket_t& operator>>(http_request_t::handle_t& handle) {
+    HttpSocket& operator>>(HttpRequest::Handle& handle) {
         handle = recv();
         return *this;
     }
-
 
     /**
      * Returns false if last recv/send operation detected
      * that connection was down; true otherwise
      */
     explicit operator bool() const { 
-       return _conn_up; 
+       return _connUp; 
     }
 
+    /**
+     * Send a response to remote peer
+     *
+     * @param response The HTTP response
+     */
+    HttpSocket& operator<<(const HttpResponse& response);
+
 
     /**
      * Send a response to remote peer
      *
      * @param response The HTTP response
      */
-    http_socket_t& operator<<(const http_response_t& response);
-
-
-    /**
-     * Send a response to remote peer
-     *
-     * @param response The HTTP response
-     */
-    int send_file(const std::string& filename) {
-        return _socket_handle->send_file(filename);
+    int sendFile(const std::string& fileName) {
+        return _socketHandle->sendFile(fileName);
     }
 };
 
@@ -276,76 +268,71 @@ public:
 /**
  * The top-level class of the HTTP server
  */
-class http_server_t {
+class HttpServer {
 public:
-    using port_t = tcp_listener_t::port_t;
+    using TranspPort = TcpListener::TranspPort;
     enum { DEFAULT_PORT = HTTP_SERVER_PORT };
 
 private:
-    std::ostream* _logger_ptr = &std::clog;
-    static http_server_t* _instance;
-    port_t _server_port = DEFAULT_PORT;
-    tcp_listener_t::handle_t _tcp_server;
-    std::string _web_root = "/tmp";
-    bool _verbose_mode = true;
+    std::ostream* _loggerOStreamPtr = &std::clog;
+    static HttpServer* _instance;
+    TranspPort _serverPort = DEFAULT_PORT;
+    TcpListener::Handle _tcpServer;
+    std::string _webRootPath = "/tmp";
+    bool _verboseModeOn = true;
 
-    http_server_t() = default;
+    HttpServer() = default;
 
 public:
-    http_server_t(const http_server_t&) = delete;
-    http_server_t& operator=(const http_server_t&) = delete;
+    HttpServer(const HttpServer&) = delete;
+    HttpServer& operator=(const HttpServer&) = delete;
 
 
     /**
-     * Sets a logger enabling the verbose mode
+     * Sets a loggerOStream enabling the verbose mode
      *
      * @param pointer to ostream used for logging
      */
-    void set_logger(std::ostream* logger_ptr = nullptr) {
-        if (logger_ptr) {
-            _logger_ptr = logger_ptr;
-            _verbose_mode = true;
+    void setupLogger(std::ostream* loggerOStream = nullptr) {
+        if (loggerOStream) {
+            _loggerOStreamPtr = loggerOStream;
+            _verboseModeOn = true;
         } else {
-            _verbose_mode = false;
+            _verboseModeOn = false;
         }
     }
 
-
     /**
-     * Gets http_server_t object instance reference
+     * Gets HttpServer object instance reference
      * This class is a singleton. First time this
-     * function is called, the http_server_t object
+     * function is called, the HttpServer object
      * is initialized
      *
-     * @return the http_server_t reference
+     * @return the HttpServer reference
      */
-    static auto get_instance() -> http_server_t&;
-
+    static auto getInstance() -> HttpServer&;
 
     /**
      * Gets current server working directory
      */
-    const std::string& get_web_root() const { 
-       return _web_root; 
+    const std::string& getWebRootPath() const { 
+       return _webRootPath; 
     }
-
 
     /**
      * Sets the server working directory
      */
-    void set_web_root(const std::string& web_root) {
-        _web_root = web_root;
+    void setupWebRootPath(const std::string& webRootPath) {
+        _webRootPath = webRootPath;
     }
-
 
     /**
      * Gets port where server is listening
      * @return the port number
      */
-    const port_t get_local_port() const { 
-       return _server_port; 
+    const TranspPort get_local_port() const { 
+       return _serverPort; 
     }
-
 
     /**
      * Binds the HTTP server to a local TCP port
@@ -353,16 +340,14 @@ public:
      * @param port The listening port
      * @return true if operation is successfully completed, false otherwise
      */
-    bool bind(port_t port = DEFAULT_PORT);
-
+    bool bind(TranspPort port = DEFAULT_PORT);
 
     /**
      * Set the server in listening mode
-     * @param max_connections back log list length
+     * @param maxConnections back log list length
      * @return true if operation is successfully completed, false otherwise
      */
-    bool listen(int max_connections);
-
+    bool listen(int maxConnections);
 
     /**
      * Run the server. This function is blocking for the caller.
@@ -382,7 +367,7 @@ protected:
      * Using @see get_last_errno() is possible to distinguish between a timeout
      * and error
      */
-    bool wait_for_conn(const basic_socket_t::timeout_t& timeout);
+    bool waitForData(const TransportSocket::TimeoutInterval& timeout);
 
     /**
      * Accepts a new connection from remote client.
@@ -390,8 +375,8 @@ protected:
      * an error occurs.
      * @return a handle to tcp socket
      */
-    tcp_socket_t::handle_t accept() { 
-       return _tcp_server->accept(); 
+    TcpSocket::Handle accept() { 
+       return _tcpServer->accept(); 
     }
 };
 

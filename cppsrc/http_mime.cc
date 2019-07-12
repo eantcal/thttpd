@@ -23,7 +23,7 @@
 
 /* -------------------------------------------------------------------------- */
 
-std::map<std::string, std::string> http_response_t::_mime_tbl = {
+std::map<std::string, std::string> HttpResponse::_mimeTbl = {
     { ".3dm", "x-world/x-3dmf" }, { ".3dmf", "x-world/x-3dmf" },
     { ".a", "application/octet-stream" },
     { ".aab", "application/x-authorware-bin" },

@@ -29,7 +29,7 @@
 #include <memory>
 
 #include "http_config.h"
-#include "os_dep.h"
+#include "osSocketSpecific.h"
 
 
 /* -------------------------------------------------------------------------- */
@@ -37,13 +37,13 @@
 /**
  * Provides socket functionality
  */
-class basic_socket_t {
+class TransportSocket {
 
 public:
-    using port_t = uint16_t;
-    using socket_desc_t = int;
-    enum class wait_ev_t { RECV_ERROR, TIMEOUT, RECV_DATA };
-    using timeout_t = std::chrono::system_clock::duration;
+    using TranspPort = uint16_t;
+    using SocketFd = int;
+    enum class WaitingEvent { RECV_ERROR, TIMEOUT, RECV_DATA };
+    using TimeoutInterval = std::chrono::system_clock::duration;
 
 protected:
     /**
@@ -52,31 +52,30 @@ protected:
      *
      * @param sd native socket descriptor
      */
-    basic_socket_t(const socket_desc_t& sd)
+    TransportSocket(const SocketFd& sd)
         : _socket(sd)
     {
     }
 
 public:
-    basic_socket_t(const basic_socket_t&) = delete;
-    basic_socket_t& operator=(const basic_socket_t&) = delete;
-    virtual ~basic_socket_t();
+    TransportSocket(const TransportSocket&) = delete;
+    TransportSocket& operator=(const TransportSocket&) = delete;
+    virtual ~TransportSocket();
 
 
     /**
      * Returns true if socket is valid, false otherwise.
      */
-    bool is_valid() const {
+    bool isValid() const {
         return _socket > 0;
     }
-
 
 
     /**
      * Returns true if socket is valid, false otherwise.
      */
     operator bool() const {
-        return is_valid();
+        return isValid();
     }
 
 
@@ -95,17 +94,17 @@ public:
      * with zero bytes returned.
      *
      * @param timeout The time-out value.
-     * @return wait_ev_t::RECV_DATA if data is available for reading,
-     *         wait_ev_t::TIMEOUT if the time limit expired or
-     *         wait_ev_t::RECV_ERROR if an error occurred
+     * @return WaitingEvent::RECV_DATA if data is available for reading,
+     *         WaitingEvent::TIMEOUT if the time limit expired or
+     *         WaitingEvent::RECV_ERROR if an error occurred
      */
-    wait_ev_t wait_for_recv_event(const timeout_t& timeout);
+    WaitingEvent waitForRecvEvent(const TimeoutInterval& timeout);
 
 
     /**
      * Returns the socket descriptor for this socket
      */
-    socket_desc_t get_sd() const {
+    SocketFd getSocketFd() const {
         return _socket;
     }
 
@@ -127,7 +126,7 @@ public:
      *
      */
     int send(const char* buf, int len, int flags = 0) {
-        return ::send(get_sd(), buf, len, flags);
+        return ::send(getSocketFd(), buf, len, flags);
     }
 
 
@@ -148,7 +147,7 @@ public:
      *             can be retrieved by calling errno
      */
     int recv(char* buf, int len, int flags = 0) {
-        return ::recv(get_sd(), buf, len, flags);
+        return ::recv(getSocketFd(), buf, len, flags);
     }
 
 
@@ -177,10 +176,10 @@ public:
      *              Otherwise, -1 is returned, and a specific error code
      *              can be retrieved by errno
      */
-    int send_file(const std::string& filepath);
+    int sendFile(const std::string& filepath);
 
 private:
-    socket_desc_t _socket = 0;
+    SocketFd _socket = 0;
     enum { TX_BUFFER_SIZE = HTTP_SERVER_TX_BUF_SIZE };
 };
 
@@ -190,8 +189,8 @@ private:
 /**
  * This class represents a TCP connection between a client and a server
  */
-class tcp_socket_t : public basic_socket_t {
-    friend class tcp_listener_t;
+class TcpSocket : public TransportSocket {
+    friend class TcpListener;
 
 public:
     enum class shutdown_mode_t : int {
@@ -200,12 +199,11 @@ public:
         DISABLE_SEND_RECV
     };
 
-    tcp_socket_t(const tcp_socket_t&) = delete;
-    tcp_socket_t& operator=(const tcp_socket_t&) = delete;
-    ~tcp_socket_t() = default;
+    TcpSocket(const TcpSocket&) = delete;
+    TcpSocket& operator=(const TcpSocket&) = delete;
+    ~TcpSocket() = default;
 
-    using handle_t = std::shared_ptr<tcp_socket_t>;
-
+    using Handle = std::shared_ptr<TcpSocket>;
 
     /**
      * Returns the local peer's ipv4 address.
@@ -214,14 +212,12 @@ public:
         return _local_ip;
     }
 
-
     /**
      * Returns the local peer's tcp port number
      */
-    port_t get_local_port() const {
+    TranspPort get_local_port() const {
         return _local_port;
     }
-
 
     /**
      * Returns the remote peer's ipv4 address.
@@ -230,14 +226,12 @@ public:
         return _remote_ip;
     }
 
-
     /**
      * Returns the remote peer's tcp port number
      */
-    port_t get_remote_port() const {
+    TranspPort get_remote_port() const {
         return _remote_port;
     }
-
 
     /**
      * Disables sends or receives on this socket
@@ -248,24 +242,23 @@ public:
      * Otherwise, -1 is returned
      */
     int shutdown(shutdown_mode_t how = shutdown_mode_t::DISABLE_SEND_RECV) {
-        return ::shutdown(get_sd(), static_cast<int>(how));
+        return ::shutdown(getSocketFd(), static_cast<int>(how));
     }
-
 
     /**
      * Sends text on this socket
      */
-    tcp_socket_t& operator<<(const std::string& text);
+    TcpSocket& operator<<(const std::string& text);
 
-    tcp_socket_t() = delete;
+    TcpSocket() = delete;
 
 private:
     std::string _local_ip;
-    port_t _local_port = 0;
+    TranspPort _local_port = 0;
     std::string _remote_ip;
-    port_t _remote_port = 0;
+    TranspPort _remote_port = 0;
 
-    tcp_socket_t(const socket_desc_t& sd, const sockaddr* local_sa,
+    TcpSocket(const SocketFd& sd, const sockaddr* local_sa,
         const sockaddr* remote_sa);
 };
 
@@ -275,24 +268,23 @@ private:
 /**
  * Listens for connections from TCP network clients.
  */
-class tcp_listener_t : public basic_socket_t {
+class TcpListener : public TransportSocket {
 public:
-    using port_t = tcp_socket_t::port_t;
-    using handle_t = std::unique_ptr<tcp_listener_t>;
+    using TranspPort = TcpSocket::TranspPort;
+    using Handle = std::unique_ptr<TcpListener>;
 
-    enum class state_t { INVALID, VALID };
-    enum class bind_st_t { UNBOUND, BOUND };
+    enum class State { INVALID, VALID };
+    enum class BindingState { UNBOUND, BOUND };
 
 
     /**
      * Returns the current state of this connection
-     * @return state_t::VALID if connection is valid,
-     *         state_t::INVALID otherwise
+     * @return State::VALID if connection is valid,
+     *         State::INVALID otherwise
      */
-    state_t get_state() const {
+    State getState() const {
         return _state;
     }
-
 
     /**
      * Returns the current state of this connection
@@ -300,29 +292,26 @@ public:
      *         false otherwise
      */
     operator bool() const {
-        return get_state() != state_t::INVALID;
+        return getState() != State::INVALID;
     }
-
 
     /**
      * Returns the current binding state of this connection
-     * @return bind_st_t::BOUND if connection is bound to
+     * @return BindingState::BOUND if connection is bound to
      *         local address and port,
-     *         bind_st_t::UNBOUND otherwise
+     *         BindingState::UNBOUND otherwise
      */
-    bind_st_t get_bind_state() const {
+    BindingState getBindingState() const {
         return _bind_st;
     }
-
 
     /**
      * Returns a handle to a new listener object
      * @return the handle to a new listenr object instance
      */
-    static handle_t create() {
-        return handle_t(new tcp_listener_t());
+    static Handle create() {
+        return Handle(new TcpListener());
     }
-
 
     /**
      * Associates a local IPv4 address and TCP port with this
@@ -332,8 +321,7 @@ public:
      * @param port The port to bind to
      * @return false if operation fails, true otherwise
      */
-    bool bind(const std::string& ip, const port_t& port);
-
+    bool bind(const std::string& ip, const TranspPort& port);
 
     /**
      * Associates a local TCP port with this connection.
@@ -341,10 +329,9 @@ public:
      * @param port The port to bind to
      * @return false if operation fails, true otherwise
      */
-    bool bind(const port_t& port) {
+    bool bind(const TranspPort& port) {
         return bind("", port);
     }
-
 
     /**
      * Enables the listening mode, to listen for incoming
@@ -354,9 +341,8 @@ public:
      * @return true if operation successfully completed, false otherwise
      */
     bool listen(int backlog = SOMAXCONN) {
-        return ::listen(get_sd(), backlog) == 0;
+        return ::listen(getSocketFd(), backlog) == 0;
     }
-
 
     /**
      * Extracts the first connection on the queue of pending connections,
@@ -364,17 +350,16 @@ public:
      *
      * @return an handle to a new tcp connection
      */
-    tcp_socket_t::handle_t accept();
-
+    TcpSocket::Handle accept();
 
 private:
-    std::atomic<state_t> _state;
-    std::atomic<bind_st_t> _bind_st;
+    std::atomic<State> _state;
+    std::atomic<BindingState> _bind_st;
 
-    port_t _port = 0;
+    TranspPort _port = 0;
     sockaddr_in _local_ip_port_sa_in;
 
-    tcp_listener_t();
+    TcpListener();
 };
 
 
