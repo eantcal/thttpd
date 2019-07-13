@@ -26,7 +26,7 @@ TransportSocket::~TransportSocket()
 
 /* -------------------------------------------------------------------------- */
 
-TransportSocket::WaitingEvent TransportSocket::waitForRecvEvent(
+TransportSocket::RecvEvent TransportSocket::waitForRecvEvent(
     const TransportSocket::TimeoutInterval& timeout)
 {
     struct timeval tv_timeout = { 0 };
@@ -41,17 +41,17 @@ TransportSocket::WaitingEvent TransportSocket::waitForRecvEvent(
     long nd = select(FD_SETSIZE, &rd_mask, (fd_set*)0, (fd_set*)0, &tv_timeout);
 
     if (nd == 0)
-        return WaitingEvent::TIMEOUT;
+        return RecvEvent::TIMEOUT;
     else if (nd < 0)
-        return WaitingEvent::RECV_ERROR;
+        return RecvEvent::RECV_ERROR;
 
-    return WaitingEvent::RECV_DATA;
+    return RecvEvent::RECV_DATA;
 }
 
 
 /* -------------------------------------------------------------------------- */
 
-int TransportSocket::sendFile(const std::string& filepath)
+int TransportSocket::sendFile(const std::string& filepath) noexcept
 {
     std::ifstream ifs(filepath.c_str(), std::ios::in | std::ios::binary);
 

@@ -17,6 +17,9 @@
 
 #include "TransportSocket.h"
 
+#include <memory>
+#include <string>
+
 
 /* -------------------------------------------------------------------------- */
 
@@ -42,29 +45,29 @@ public:
     /**
      * Returns the local peer's ipv4 address.
      */
-    std::string get_local_ip() const {
-        return _local_ip;
+    const std::string& getLocalIpAddress() const {
+        return _localIpAddress;
     }
 
     /**
      * Returns the local peer's tcp port number
      */
-    TranspPort get_local_port() const {
-        return _local_port;
+    const TranspPort& getLocalPort() const {
+        return _localPort;
     }
 
     /**
      * Returns the remote peer's ipv4 address.
      */
-    std::string get_remote_ip() const {
-        return _remote_ip;
+    const std::string& getRemoteIpAddress() const {
+        return _remoteIpAddress;
     }
 
     /**
      * Returns the remote peer's tcp port number
      */
-    TranspPort get_remote_port() const {
-        return _remote_port;
+    const TranspPort& getRemotePort() const {
+        return _remotePort;
     }
 
     /**
@@ -87,10 +90,10 @@ public:
     TcpSocket() = delete;
 
 private:
-    std::string _local_ip;
-    TranspPort _local_port = 0;
-    std::string _remote_ip;
-    TranspPort _remote_port = 0;
+    std::string _localIpAddress;
+    TranspPort _localPort = 0;
+    std::string _remoteIpAddress;
+    TranspPort _remotePort = 0;
 
     TcpSocket(const SocketFd& sd, const sockaddr* local_sa,
         const sockaddr* remote_sa);

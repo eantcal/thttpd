@@ -229,10 +229,10 @@ bool HttpServer::waitForData(const TransportSocket::TimeoutInterval& timeout)
         return false;
     }
 
-    const TcpListener::WaitingEvent st
+    const TcpListener::RecvEvent st
         = _tcpServer->waitForRecvEvent(timeout);
 
-    return st == TcpListener::WaitingEvent::RECV_DATA;
+    return st == TcpListener::RecvEvent::RECV_DATA;
 }
 
 

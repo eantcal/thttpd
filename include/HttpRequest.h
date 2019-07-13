@@ -47,21 +47,21 @@ public:
     /**
      * Returns the method of the command line (GET, HEAD, ...)
      */
-    Method getMethod() const { 
+    const Method& getMethod() const noexcept { 
        return _method; 
     }
 
     /**
      * Returns the HTTP version (HTTP/1.0, HTTP/1.1, ...)
      */
-    Version getVersion() const { 
+    const Version& getVersion() const noexcept { 
        return _version; 
     }
 
     /**
      * Returns the command line URI
      */
-    const std::string& getUri() const { 
+    const std::string& getUri() const noexcept { 
        return _uri; 
     }
 

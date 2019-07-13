@@ -86,7 +86,7 @@ public:
      * Gets port where server is listening
      * @return the port number
      */
-    const TranspPort get_local_port() const { 
+    const TranspPort getLocalPort() const { 
        return _serverPort; 
     }
 
@@ -117,7 +117,6 @@ protected:
      * This function wait for receive activity or until time-out expires
      * @param timeout the duration of time-out
      * @return true if receive activity is detected, false otherwise
-     * Using @see get_last_errno() is possible to distinguish between a timeout
      * and error
      */
     bool waitForData(const TransportSocket::TimeoutInterval& timeout);

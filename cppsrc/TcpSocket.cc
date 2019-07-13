@@ -36,7 +36,7 @@ TcpSocket::TcpSocket(const SocketFd& sd, const sockaddr* local_sa,
             inet_ntoa(reinterpret_cast<const sockaddr_in*>(sa)->sin_addr));
     };
 
-    conv(_local_port, _local_ip, local_sa);
-    conv(_remote_port, _remote_ip, remote_sa);
+    conv(_localPort, _localIpAddress, local_sa);
+    conv(_remotePort, _remoteIpAddress, remote_sa);
 }
 

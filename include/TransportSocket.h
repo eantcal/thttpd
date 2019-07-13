@@ -34,7 +34,7 @@ class TransportSocket {
 public:
     using TranspPort = uint16_t;
     using SocketFd = int;
-    enum class WaitingEvent { RECV_ERROR, TIMEOUT, RECV_DATA };
+    enum class RecvEvent { RECV_ERROR, TIMEOUT, RECV_DATA };
     using TimeoutInterval = std::chrono::system_clock::duration;
 
 protected:
@@ -44,7 +44,7 @@ protected:
      *
      * @param sd native socket descriptor
      */
-    TransportSocket(const SocketFd& sd)
+    TransportSocket(const SocketFd& sd) noexcept
         : _socket(sd)
     {
     }
@@ -58,18 +58,9 @@ public:
     /**
      * Returns true if socket is valid, false otherwise.
      */
-    bool isValid() const {
+    bool isValid() const noexcept {
         return _socket > 0;
     }
-
-
-    /**
-     * Returns true if socket is valid, false otherwise.
-     */
-    operator bool() const {
-        return isValid();
-    }
-
 
     /**
      * Determines the readability status of this socket
@@ -86,17 +77,17 @@ public:
      * with zero bytes returned.
      *
      * @param timeout The time-out value.
-     * @return WaitingEvent::RECV_DATA if data is available for reading,
-     *         WaitingEvent::TIMEOUT if the time limit expired or
-     *         WaitingEvent::RECV_ERROR if an error occurred
+     * @return RecvEvent::RECV_DATA if data is available for reading,
+     *         RecvEvent::TIMEOUT if the time limit expired or
+     *         RecvEvent::RECV_ERROR if an error occurred
      */
-    WaitingEvent waitForRecvEvent(const TimeoutInterval& timeout);
+    RecvEvent waitForRecvEvent(const TimeoutInterval& timeout);
 
 
     /**
      * Returns the socket descriptor for this socket
      */
-    SocketFd getSocketFd() const {
+    const SocketFd& getSocketFd() const noexcept {
         return _socket;
     }
 
@@ -117,7 +108,7 @@ public:
      *              can be retrieved by calling errno
      *
      */
-    int send(const char* buf, int len, int flags = 0) {
+    int send(const char* buf, int len, int flags = 0) noexcept {
         return ::send(getSocketFd(), buf, len, flags);
     }
 
@@ -138,7 +129,7 @@ public:
      *              Otherwise, -1 is returned, and a specific error code
      *             can be retrieved by calling errno
      */
-    int recv(char* buf, int len, int flags = 0) {
+    int recv(char* buf, int len, int flags = 0) noexcept {
         return ::recv(getSocketFd(), buf, len, flags);
     }
 
@@ -153,7 +144,7 @@ public:
      *              Otherwise, -1 is returned, and a specific error code
      *              can be retrieved by errno
      */
-    int send(const std::string& text) {
+    int send(const std::string& text) noexcept {
         return send(text.c_str(), int(text.size()));
     }
 
@@ -168,7 +159,7 @@ public:
      *              Otherwise, -1 is returned, and a specific error code
      *              can be retrieved by errno
      */
-    int sendFile(const std::string& filepath);
+    int sendFile(const std::string& filepath) noexcept;
 
 private:
     SocketFd _socket = 0;
