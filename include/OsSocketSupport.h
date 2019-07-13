@@ -42,7 +42,8 @@ bool initSocketLibrary(std::string& msg);
 /* -------------------------------------------------------------------------- */
 
 /**
- * Closes a socket descriptor
+ * Closes a socket descriptor.
+ *
  * @return zero on success. On error, -1 is returned
  */
 int closeSocketFd(int sd);
