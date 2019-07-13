@@ -114,14 +114,6 @@ public:
 
 protected:
     /**
-     * This function wait for receive activity or until time-out expires
-     * @param timeout the duration of time-out
-     * @return true if receive activity is detected, false otherwise
-     * and error
-     */
-    bool waitForData(const TransportSocket::TimeoutInterval& timeout);
-
-    /**
      * Accepts a new connection from remote client.
      * This function blocks until connection is established or
      * an error occurs.

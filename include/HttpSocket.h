@@ -25,6 +25,8 @@
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 
+#include "config.h"
+
 #include <string>
 
 
@@ -42,9 +44,13 @@ private:
     TcpSocket::Handle _socketHandle;
     bool _connUp = true;
     HttpRequest::Handle recv();
+    int _connectionTimeOut = HTTP_CONNECTION_TIMEOUT; // secs
 
 public:
-    HttpSocket() = default;
+    HttpSocket(int connectionTimeout = HTTP_CONNECTION_TIMEOUT) noexcept :
+        _connectionTimeOut(connectionTimeout) 
+    {}
+
     HttpSocket(const HttpSocket&) = default;
 
     /**
@@ -97,6 +103,13 @@ public:
      */
     int sendFile(const std::string& fileName) {
         return _socketHandle->sendFile(fileName);
+    }
+
+    /*
+     * Return connection timeout interval in seconds
+     */
+    const int& getConnectionTimeout() const noexcept {
+        return _connectionTimeOut;
     }
 };
 

@@ -66,6 +66,22 @@ HttpRequest::Handle HttpSocket::recv()
     std::string line;
 
     while (ret > 0 && _connUp && _socketHandle) {
+        std::chrono::seconds sec(getConnectionTimeout());
+
+        auto recvEv = _socketHandle->waitForRecvEvent(sec);
+
+        switch (recvEv) {
+        case TransportSocket::RecvEvent::RECV_ERROR:
+        case TransportSocket::RecvEvent::TIMEOUT:
+            _connUp = false;
+            break;
+        default:
+            break;
+        }
+
+        if (!_connUp)
+            break;
+
         ret = _socketHandle->recv(&c, 1);
 
         if (ret > 0) {

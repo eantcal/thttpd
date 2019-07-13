@@ -221,21 +221,4 @@ bool HttpServer::run()
 
 /* -------------------------------------------------------------------------- */
 
-bool HttpServer::waitForData(const TransportSocket::TimeoutInterval& timeout)
-{
-    if (!_tcpServer->isValid()
-        || _tcpServer->getBindingState()
-            == TcpListener::BindingState::UNBOUND) {
-        return false;
-    }
-
-    const TcpListener::RecvEvent st
-        = _tcpServer->waitForRecvEvent(timeout);
-
-    return st == TcpListener::RecvEvent::RECV_DATA;
-}
-
-
-/* -------------------------------------------------------------------------- */
-
 HttpServer* HttpServer::_instance = nullptr;
