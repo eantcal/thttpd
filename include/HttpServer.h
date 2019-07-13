@@ -18,6 +18,8 @@
 #include "HttpSocket.h"
 #include "TcpListener.h"
 
+#include "config.h"
+
 #include <iostream>
 #include <string>
 
@@ -30,7 +32,7 @@
 class HttpServer {
 public:
     using TranspPort = TcpListener::TranspPort;
-    enum { DEFAULT_PORT = 80 };
+    enum { DEFAULT_PORT = HTTP_SERVER_PORT };
 
 private:
     std::ostream* _loggerOStreamPtr = &std::clog;
@@ -49,6 +51,7 @@ public:
 
     /**
      * Sets a loggerOStream enabling the verbose mode.
+     *
      * @param pointer to ostream used for logging
      */
     void setupLogger(std::ostream* loggerOStream = nullptr) {
@@ -64,6 +67,7 @@ public:
      * Gets HttpServer object instance reference.
      * This class is a singleton. First time this function is called, 
      * the HttpServer object is initialized.
+     *
      * @return the HttpServer reference
      */
     static auto getInstance() -> HttpServer&;
@@ -83,7 +87,8 @@ public:
     }
 
     /**
-     * Gets port where server is listening
+     * Gets the port where server is listening
+     *
      * @return the port number
      */
     const TranspPort getLocalPort() const { 
@@ -92,20 +97,23 @@ public:
 
     /**
      * Binds the HTTP server to a local TCP port
-     * @param port The listening port
+     *
+     * @param port listening port
      * @return true if operation is successfully completed, false otherwise
      */
     bool bind(TranspPort port = DEFAULT_PORT);
 
     /**
-     * Set the server in listening mode
+     * Sets the server in listening mode
+     *
      * @param maxConnections back log list length
      * @return true if operation is successfully completed, false otherwise
      */
     bool listen(int maxConnections);
 
     /**
-     * Run the server. This function is blocking for the caller.
+     * Runs the server. This function is blocking for the caller.
+     *
      * @return false if operation failed, otherwise the function
      * doesn't return ever
      */
@@ -114,7 +122,7 @@ public:
 
 protected:
     /**
-     * Accepts a new connection from remote client.
+     * Accepts a new connection from a remote client.
      * This function blocks until connection is established or
      * an error occurs.
      * @return a handle to tcp socket

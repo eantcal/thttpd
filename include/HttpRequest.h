@@ -44,12 +44,14 @@ public:
        return _header; 
     }
 
+
     /**
      * Returns the method of the command line (GET, HEAD, ...)
      */
     const Method& getMethod() const noexcept { 
        return _method; 
     }
+
 
     /**
      * Returns the HTTP version (HTTP/1.0, HTTP/1.1, ...)
@@ -58,6 +60,7 @@ public:
        return _version; 
     }
 
+
     /**
      * Returns the command line URI
      */
@@ -65,28 +68,35 @@ public:
        return _uri; 
     }
 
+
     /**
-     * Set HTTP method field decoding the string method.
-     * @param method The input string to parse
+     * Parses the HTTP method.
+     *
+     * @param method input string
      */
     void parseMethod(const std::string& method);
 
+
     /**
-     * Set HTTP URI field decoding the string uri.
+     * Parses the URI field.
+     *
      * @param uri The input string to parse
      */
     void parseUri(const std::string& uri) {
         _uri = uri == "/" ? "index.html" : uri;
     }
 
+
     /**
-     * Set HTTP version field decoding the string ver.
+     * Parses the HTTP version.
+     *
      * @param ver The input string to parse
      */
     void parseVersion(const std::string& ver);
 
+
     /**
-     * Add a new header to request
+     * Adds a new header to request
      *
      * @param new_header The header content to add to headers fields
      */
@@ -94,14 +104,16 @@ public:
         _header.push_back(new_header);
     }
 
+
     /**
-     * Prints the request out to the os stream.
+     * Prints the request.
      *
-     * @param os The output stream
-     * @param id A string used to identify the request
-     * @return the os output stream
+     * @param os output stream
+     * @param id request identifier
+     * @return output stream reference
      */
     std::ostream& dump(std::ostream& os, const std::string& id = "");
+
 
 private:
     std::list<std::string> _header;

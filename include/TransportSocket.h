@@ -41,7 +41,6 @@ protected:
     /**
      * Construct a basic_socket on an existing native socket
      * descriptor (@see ::socket())
-     *
      * @param sd native socket descriptor
      */
     TransportSocket(const SocketFd& sd) noexcept

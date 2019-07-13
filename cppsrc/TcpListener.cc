@@ -20,8 +20,7 @@
 
 TcpListener::TcpListener()
     : TransportSocket(int(::socket(AF_INET, SOCK_STREAM, 0)))
-    , _state(isValid() ? State::VALID : State::INVALID)
-    , _bind_st(BindingState::UNBOUND)
+    , _status(isValid() ? Status::VALID : Status::INVALID)
 {
     memset(&_local_ip_port_sa_in, 0, sizeof(_local_ip_port_sa_in));
 }
@@ -40,12 +39,8 @@ bool TcpListener::bind(const std::string& ip, const TranspPort& port)
     sin.sin_addr.s_addr = ip.empty() ? INADDR_ANY : inet_addr(ip.c_str());
     sin.sin_port = htons(port);
 
-    if (0 == ::bind(getSocketFd(), reinterpret_cast<const sockaddr*>(&sin), sizeof(sin))) {
-        _bind_st = BindingState::BOUND;
-        return true;
-    }
-
-    return false;
+    return 0 == 
+        ::bind(getSocketFd(), reinterpret_cast<const sockaddr*>(&sin), sizeof(sin));
 }
 
 
@@ -53,7 +48,7 @@ bool TcpListener::bind(const std::string& ip, const TranspPort& port)
 
 TcpSocket::Handle TcpListener::accept()
 {
-    if (getState() != State::VALID)
+    if (getStatus() != Status::VALID)
         return TcpSocket::Handle();
 
     sockaddr remote_sockaddr = { 0 };

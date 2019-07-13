@@ -72,11 +72,12 @@ public:
 
     /**
      * Disables sends or receives on this socket
+     *
      * @param how can be DISABLE_RECV to disable receive operation,
      * DISABLE_SEND to disable send operations, DISABLE_SEND_RECV
      * for both send and receive operation
-     * @return If no error occurs, shutdown returns zero.
-     * Otherwise, -1 is returned
+     *
+     * @return zero If no error occurs, -1 otherwise.
      */
     int shutdown(shutdown_mode_t how = shutdown_mode_t::DISABLE_SEND_RECV) {
         return ::shutdown(getSocketFd(), static_cast<int>(how));

@@ -36,18 +36,18 @@ using TimeoutInterval = std::chrono::system_clock::duration;
 /* -------------------------------------------------------------------------- */
 
 /**
-* Convert a timeval object into standard duration object
-*
-* @param d  Duration
-* @param tv Timeval source object
-*/
+ * Converts a timeval object into standard duration object
+ *
+ * @param d  Duration
+ * @param tv Timeval source object
+ */
 void convertDurationInTimeval(const TimeoutInterval& d, timeval& tv);
 
 
 /* -------------------------------------------------------------------------- */
 
 /**
- * Get the system time, corrected for the local time zone
+ * Gets the system time, corrected for the local time zone
  * Time format is "DoW Mon dd hh:mm:ss yyyy"
  * Example "Thu Sep 19 10:03:50 2013"
  *
@@ -59,7 +59,7 @@ void getLocalTime(std::string& localTime);
 /* -------------------------------------------------------------------------- */
 
 /**
- * Get the system time, corrected for the local time zone
+ * Gets the system time, corrected for the local time zone
  * Time format is "DoW Mon dd hh:mm:ss yyyy"
  * Example "Thu Sep 19 10:03:50 2013"
  *
@@ -87,12 +87,12 @@ void removeLastCharIf(std::string& s, char c);
 /* -------------------------------------------------------------------------- */
 
 /**
- *  Returns file attributes of fileName.
+ * Returns file attributes of fileName.
  *
- *  @param fileName String containing the path of existing file
- *  @param dateTime Time of last modification of file
- *  @param ext File extension or "." if there is no any
- *  @return true if operation successfully completed, false otherwise
+ * @param fileName String containing the path of existing file
+ * @param dateTime Time of last modification of file
+ * @param ext File extension or "." if there is no any
+ * @return true if operation successfully completed, false otherwise
  */
 bool fileStat(const std::string& fileName, std::string& dateTime,
     std::string& ext, size_t& fsize);
@@ -101,45 +101,7 @@ bool fileStat(const std::string& fileName, std::string& dateTime,
 /* -------------------------------------------------------------------------- */
 
 /**
- *  Returns file size
- *
- *  @param fileName String containing the path of existing file/directory
- *  @return file size if operation successfully completed, -1 otherwise
- */
-inline size_t file_size(const std::string& fileName)
-{
-    std::string dateTime;
-    std::string ext;
-    size_t fsize = 0;
-
-    const bool ok = fileStat(fileName, dateTime, ext, fsize);
-
-    return ok ? fsize : -1;
-}
-
-
-/* -------------------------------------------------------------------------- */
-
-/**
-*  Returns true if file/directory fileName exists
-*
-*  @param fileName String containing the path of existing file/directory
-*  @return true if operation successfully completed, false otherwise
-*/
-inline bool fileExists(const std::string& fileName)
-{
-    std::string dateTime;
-    std::string ext;
-    size_t fsize = 0;
-
-    return fileStat(fileName, dateTime, ext, fsize);
-}
-
-
-/* -------------------------------------------------------------------------- */
-
-/**
- * Split text line in a vector of tokens.
+ * Splits a text line into a vector of tokens.
  *
  * @param line The string to split
  * @param tokens The vector of splitted tokens

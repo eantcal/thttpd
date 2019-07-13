@@ -35,45 +35,39 @@ public:
     using TranspPort = TcpSocket::TranspPort;
     using Handle = std::unique_ptr<TcpListener>;
 
-    enum class State { INVALID, VALID };
-    enum class BindingState { UNBOUND, BOUND };
+    enum class Status { INVALID, VALID };
 
 
     /**
-     * Returns the current state of this connection
+     * Returns the current state of this connection.
+     *
      * @return State::VALID if connection is valid,
      *         State::INVALID otherwise
      */
-    State getState() const {
-        return _state;
+    Status getStatus() const {
+        return _status;
     }
 
+
     /**
-     * Returns the current state of this connection
+     * Returns the current state of this connection.
      * @return true if connection is valid,
      *         false otherwise
      */
     operator bool() const {
-        return getState() != State::INVALID;
+        return getStatus() != Status::INVALID;
     }
 
-    /**
-     * Returns the current binding state of this connection
-     * @return BindingState::BOUND if connection is bound to
-     *         local address and port,
-     *         BindingState::UNBOUND otherwise
-     */
-    BindingState getBindingState() const {
-        return _bind_st;
-    }
 
     /**
-     * Returns a handle to a new listener object
+     * Returns a handle to a new listener object.
+     *
      * @return the handle to a new listenr object instance
      */
     static Handle create() {
         return Handle(new TcpListener());
     }
+
 
     /**
      * Associates a local IPv4 address and TCP port with this
@@ -84,6 +78,7 @@ public:
      * @return false if operation fails, true otherwise
      */
     bool bind(const std::string& ip, const TranspPort& port);
+
 
     /**
      * Associates a local TCP port with this connection.
@@ -115,8 +110,7 @@ public:
     TcpSocket::Handle accept();
 
 private:
-    std::atomic<State> _state;
-    std::atomic<BindingState> _bind_st;
+    std::atomic<Status> _status;
 
     TranspPort _port = 0;
     sockaddr_in _local_ip_port_sa_in;

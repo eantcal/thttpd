@@ -21,10 +21,6 @@
 
 
 /* -------------------------------------------------------------------------- */
-// HttpResponse
-
-
-/* -------------------------------------------------------------------------- */
 
 /**
  * Encapsulates HTTP style response, consisting of a status line,
@@ -36,12 +32,15 @@ public:
     HttpResponse(const HttpResponse&) = default;
     HttpResponse& operator=(const HttpResponse&) = default;
 
+
     /**
-     * Construct a response to a request.
+     * Constructs a response to a request.
+     *
      * @param request an http request
      * @param webRootPath local working directory of the web server
      */
     HttpResponse(const HttpRequest& request, const std::string& webRootPath);
+
 
     /**
      * Returns the content of response status line and response headers.
@@ -50,6 +49,7 @@ public:
        return _response; 
     }
 
+
     /**
      * Returns the content of local resource related to the URI requested.
      */
@@ -57,8 +57,10 @@ public:
         return _localUriPath;
     }
 
+
     /**
      * Prints the response out to os stream.
+     *
      * @param os The output stream
      * @param id A string used to identify the response
      * @return the os output stream
