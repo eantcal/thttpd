@@ -1,4 +1,6 @@
 # thttpd
+| Linux  | [![Linux Build](https://travis-ci.org/eantcal/thttpd.svg?branch=master)](https://travis-ci.org/eantcal/thttpd)  |
+
 TinyHttpServer is a lightweight web server implemented in C++11
 
 ![TinyHttpServer](pics/tinyhttp.png)
