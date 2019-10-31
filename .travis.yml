@@ -1,0 +1,35 @@
+language: cpp
+
+env:
+  global:
+    - DEPS_DIR=${TRAVIS_BUILD_DIR}/deps
+    
+    # Global build options and C++ flags
+    - CXX_FLAGS="-Wall -pedantic -Werror -Wno-variadic-macros -Wno-long-long -Wno-shadow"
+   
+matrix:
+  include:
+    - os: linux
+      dist: bionic
+      sudo: true
+      compiler: gcc
+    
+before_install:
+    # Combine global build options with OS/compiler-dependent options
+    - export CMAKE_OPTIONS=${CMAKE_OPTIONS}" "${ENV_CMAKE_OPTIONS}
+    - export CXX_FLAGS=${CXX_FLAGS}" "${ENV_CXX_FLAGS}
+
+before_script:
+  - mkdir build
+  - cd build
+  - cmake ..
+
+script:
+    ############################################################################
+    # Build main and tests
+    ############################################################################
+
+    - make
+    
+after_success:
+    # todo
